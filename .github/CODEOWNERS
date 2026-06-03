@@ -1,0 +1,21 @@
+# CODEOWNERS — NexusERP
+# Les owners sont requis comme reviewers sur les PR touchant les chemins correspondants.
+# Doc : https://docs.github.com/articles/about-code-owners
+
+# Propriétaire par défaut de tout le dépôt
+*                       @Couldevlop
+
+# ─── Backend (Java / Spring Boot) ───────────────────────────────
+/backend/                @Couldevlop
+
+# ─── Frontend (Angular) ─────────────────────────────────────────
+/frontend/               @Couldevlop
+
+# ─── Service IA (Python / FastAPI) ──────────────────────────────
+/ai-service/             @Couldevlop
+
+# ─── Infra / CI / Helm / Docker ─────────────────────────────────
+/.github/                @Couldevlop
+/helm/                   @Couldevlop
+/infrastructure/         @Couldevlop
+/docker-compose.yml      @Couldevlop
