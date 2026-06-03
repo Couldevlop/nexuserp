@@ -25,7 +25,4 @@ structlog==24.4.0
 pytesseract==0.3.13
 Pillow==11.0.0
 python-doctr==0.9.0
-pytest==8.3.3
-pytest-asyncio==0.24.0
-pytest-cov==6.0.0
-mypy==1.13.0
+# Outils de test/typage : voir requirements-dev.txt (évite les conflits de versions)
