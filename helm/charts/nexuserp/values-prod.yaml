@@ -1,0 +1,13 @@
+# Override production (branche main → namespace nexuserp-prod)
+global:
+  domain: nexuserp.example             # ⚠️ remplace par ton domaine réel
+  image:
+    pullPolicy: IfNotPresent
+  ingress:
+    enabled: true
+    className: traefik
+    tls: true
+    clusterIssuer: letsencrypt-prod    # nécessite cert-manager installé sur le k3s
+
+defaults:
+  replicas: 2

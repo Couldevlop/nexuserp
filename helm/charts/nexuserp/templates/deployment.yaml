@@ -1,0 +1,71 @@
+{{- range .Values.services }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .name }}
+  labels:
+    app.kubernetes.io/name: {{ .name }}
+    {{- include "nexuserp.labels" $ | nindent 4 }}
+spec:
+  replicas: {{ .replicas | default $.Values.defaults.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .name }}
+        {{- include "nexuserp.labels" $ | nindent 8 }}
+    spec:
+      {{- with $.Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .name }}
+          image: "{{ $.Values.global.image.registry }}/{{ .image }}:{{ $.Values.global.image.tag }}"
+          imagePullPolicy: {{ $.Values.global.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .port }}
+          envFrom:
+            {{- if $.Values.global.envConfigMap }}
+            - configMapRef:
+                name: {{ $.Values.global.envConfigMap }}
+                optional: true
+            {{- end }}
+            {{- if $.Values.global.envSecret }}
+            - secretRef:
+                name: {{ $.Values.global.envSecret }}
+                optional: true
+            {{- end }}
+          {{- with .env }}
+          env:
+            {{- range $k, $v := . }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}
+          {{- end }}
+          readinessProbe:
+            httpGet:
+              path: {{ .health | default "/" }}
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: {{ .health | default "/" }}
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            failureThreshold: 6
+          resources:
+            {{- toYaml (.resources | default $.Values.defaults.resources) | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]
+---
+{{- end }}

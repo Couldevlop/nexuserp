@@ -1,0 +1,80 @@
+name: Build & Publish images
+
+# Construit et publie les images sur GHCR. AUCUN secret de déploiement n'est stocké
+# dans GitHub (OWASP CICD-SEC-6/7) : le déploiement se fait depuis TA machine via
+# `scripts/deploy.sh` (SSH). Voir docs/deployment.md.
+on:
+  push:
+    branches: [develop, main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write   # push GHCR via le GITHUB_TOKEN automatique (pas de PAT stocké)
+
+concurrency:
+  group: images-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-push:
+    name: Build & push (${{ matrix.service.name }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - { name: nexus-gateway,      file: backend/services/nexus-gateway/Dockerfile,      context: . }
+          - { name: nexus-auth,         file: backend/services/nexus-auth/Dockerfile,         context: . }
+          - { name: nexus-finance,      file: backend/services/nexus-finance/Dockerfile,      context: . }
+          - { name: nexus-procurement,  file: backend/services/nexus-procurement/Dockerfile,  context: . }
+          - { name: nexus-inventory,    file: backend/services/nexus-inventory/Dockerfile,    context: . }
+          - { name: nexus-sales,        file: backend/services/nexus-sales/Dockerfile,        context: . }
+          - { name: nexus-hr,           file: backend/services/nexus-hr/Dockerfile,           context: . }
+          - { name: nexus-production,   file: backend/services/nexus-production/Dockerfile,    context: . }
+          - { name: nexus-notification, file: backend/services/nexus-notification/Dockerfile, context: . }
+          - { name: nexus-import,       file: backend/services/nexus-import/Dockerfile,        context: . }
+          - { name: nexus-reporting,    file: backend/services/nexus-reporting/Dockerfile,    context: . }
+          - { name: nexus-payment,      file: backend/services/nexus-payment/Dockerfile,      context: . }
+          - { name: nexus-ai,           file: ai-service/Dockerfile,                          context: ai-service }
+          - { name: nexus-frontend,     file: frontend/Dockerfile,                            context: frontend }
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute lowercase owner
+        id: vars
+        run: echo "owner=${OWNER,,}" >> "$GITHUB_OUTPUT"
+        env:
+          OWNER: ${{ github.repository_owner }}
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Login GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}   # token éphémère du run, jamais stocké
+
+      - name: Image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ steps.vars.outputs.owner }}/${{ matrix.service.name }}
+          tags: |
+            type=sha,prefix=sha-,format=short
+            type=ref,event=branch
+            type=ref,event=tag
+
+      - name: Build & push
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.service.context }}
+          file: ${{ matrix.service.file }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
