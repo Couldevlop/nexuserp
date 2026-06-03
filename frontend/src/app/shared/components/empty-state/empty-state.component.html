@@ -1,0 +1,10 @@
+<div class="nx-empty-state" role="status">
+  <div class="nx-empty-state__icon" aria-hidden="true">{{ icon }}</div>
+  <h3 class="nx-empty-state__title">{{ title }}</h3>
+  @if (description) {
+    <p class="nx-empty-state__description">{{ description }}</p>
+  }
+  <div class="nx-empty-state__actions">
+    <ng-content />
+  </div>
+</div>

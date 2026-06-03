@@ -1,0 +1,16 @@
+.nx-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+
+  &--success  { background: #D1FAE5; color: #065F46; }
+  &--warning  { background: #FEF3C7; color: #92400E; }
+  &--error    { background: #FEE2E2; color: #991B1B; }
+  &--info     { background: #DBEAFE; color: #1E40AF; }
+  &--neutral  { background: #F1F5F9; color: #475569; }
+}

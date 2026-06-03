@@ -1,0 +1,183 @@
+<nav class="nx-breadcrumb" aria-label="Fil d'Ariane">
+  <a routerLink="/procurement/orders" class="nx-breadcrumb__link">Commandes d'achat</a>
+  <span class="nx-breadcrumb__sep" aria-hidden="true">/</span>
+  <span class="nx-breadcrumb__current" aria-current="page">Nouvelle commande</span>
+</nav>
+
+<div class="nx-page-header">
+  <div class="nx-page-header__content">
+    <h1 class="nx-page-header__title">Nouvelle commande d'achat</h1>
+  </div>
+  <div class="nx-page-header__actions">
+    <a routerLink="/procurement/orders" class="nx-btn nx-btn--ghost">Annuler</a>
+    <button class="nx-btn nx-btn--primary" (click)="submit()"
+            [disabled]="isSubmitting() || !isValid()"
+            aria-label="Enregistrer la commande d'achat">
+      @if (isSubmitting()) { Enregistrement… } @else { Enregistrer }
+    </button>
+  </div>
+</div>
+
+<div class="create-grid">
+
+  <!-- Supplier info -->
+  <div class="nx-card">
+    <div class="nx-card__header">
+      <h2 class="nx-card__title">Fournisseur</h2>
+    </div>
+    <div class="nx-card__body">
+      <div class="nx-form-group">
+        <label class="nx-label" for="supplierName">
+          Nom du fournisseur <span class="required" aria-hidden="true">*</span>
+        </label>
+        <input id="supplierName" type="text" class="nx-input"
+               [value]="form().supplierName"
+               (input)="updateField('supplierName', $any($event.target).value)"
+               placeholder="Raison sociale du fournisseur"
+               required aria-required="true" />
+      </div>
+      <div class="nx-form-group">
+        <label class="nx-label" for="supplierId">Identifiant fournisseur</label>
+        <input id="supplierId" type="text" class="nx-input"
+               [value]="form().supplierId"
+               (input)="updateField('supplierId', $any($event.target).value)"
+               placeholder="Référence interne (optionnel)" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Order settings -->
+  <div class="nx-card">
+    <div class="nx-card__header">
+      <h2 class="nx-card__title">Paramètres</h2>
+    </div>
+    <div class="nx-card__body">
+      <div class="settings-grid">
+        <div class="nx-form-group">
+          <label class="nx-label" for="deliveryDate">Livraison prévue</label>
+          <input id="deliveryDate" type="date" class="nx-input"
+                 [value]="form().expectedDeliveryDate"
+                 (change)="updateField('expectedDeliveryDate', $any($event.target).value)" />
+        </div>
+        <div class="nx-form-group">
+          <label class="nx-label" for="currency">Devise</label>
+          <select id="currency" class="nx-input"
+                  [value]="form().currency"
+                  (change)="updateField('currency', $any($event.target).value)"
+                  aria-label="Choisir une devise">
+            @for (c of currencies; track c) {
+              <option [value]="c">{{ c }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <div class="nx-form-group">
+        <label class="nx-label" for="notes">Notes</label>
+        <textarea id="notes" class="nx-input" rows="4"
+                  [value]="form().notes"
+                  (input)="updateField('notes', $any($event.target).value)"
+                  placeholder="Instructions, conditions particulières…"></textarea>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Lines -->
+<div class="nx-card lines-card">
+  <div class="nx-card__header">
+    <h2 class="nx-card__title">Lignes de commande</h2>
+    <button class="nx-btn nx-btn--secondary" (click)="addLine()" type="button"
+            aria-label="Ajouter une ligne">
+      + Ajouter une ligne
+    </button>
+  </div>
+  <div class="nx-card__body" style="padding: 0; overflow-x: auto;">
+    <table class="nx-table lines-table" aria-label="Lignes de commande">
+      <thead>
+        <tr>
+          <th scope="col" style="width: 120px;">Code</th>
+          <th scope="col">Produit / Service <span class="required" aria-hidden="true">*</span></th>
+          <th scope="col" style="width: 80px;">Qté</th>
+          <th scope="col" style="width: 110px;">P.U. HT</th>
+          <th scope="col" style="width: 110px;">TVA</th>
+          <th scope="col" style="width: 130px; text-align: right;">Total TTC</th>
+          <th scope="col" style="width: 40px;"><span class="sr-only">Supprimer</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (line of form().lines; track $index; let i = $index) {
+          <tr>
+            <td>
+              <input type="text" class="nx-input nx-input--inline"
+                     [value]="line.productCode"
+                     (input)="updateLine(i, 'productCode', $any($event.target).value)"
+                     [attr.placeholder]="'Réf.'"
+                     [attr.aria-label]="'Code produit ligne ' + (i + 1)" />
+            </td>
+            <td>
+              <input type="text" class="nx-input nx-input--inline"
+                     [value]="line.description"
+                     (input)="updateLine(i, 'description', $any($event.target).value)"
+                     [attr.placeholder]="'Désignation produit/service ' + (i + 1)"
+                     [attr.aria-label]="'Désignation ligne ' + (i + 1)"
+                     required />
+            </td>
+            <td>
+              <input type="number" class="nx-input nx-input--inline nx-input--number"
+                     [value]="line.quantity"
+                     (input)="updateLine(i, 'quantity', +$any($event.target).value)"
+                     min="0.001" step="1"
+                     [attr.aria-label]="'Quantité ligne ' + (i + 1)" />
+            </td>
+            <td>
+              <input type="number" class="nx-input nx-input--inline nx-input--number"
+                     [value]="line.unitPrice"
+                     (input)="updateLine(i, 'unitPrice', +$any($event.target).value)"
+                     min="0" step="0.01"
+                     [attr.aria-label]="'Prix unitaire ligne ' + (i + 1)" />
+            </td>
+            <td>
+              <select class="nx-input nx-input--inline"
+                      [value]="line.taxRate"
+                      (change)="updateLine(i, 'taxRate', +$any($event.target).value)"
+                      [attr.aria-label]="'Taux TVA ligne ' + (i + 1)">
+                @for (tax of taxRates; track tax.value) {
+                  <option [value]="tax.value">{{ tax.label }}</option>
+                }
+              </select>
+            </td>
+            <td class="line-total">
+              {{ formatAmount(getLineTotal(line)) }}
+            </td>
+            <td>
+              @if (form().lines.length > 1) {
+                <button class="remove-line-btn" (click)="removeLine(i)" type="button"
+                        [attr.aria-label]="'Supprimer la ligne ' + (i + 1)">
+                  ×
+                </button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+      <tfoot>
+        <tr class="totals-row">
+          <td colspan="5" class="totals-label">Sous-total HT</td>
+          <td class="line-total">{{ formatAmount(subtotal()) }}</td>
+          <td></td>
+        </tr>
+        <tr class="totals-row">
+          <td colspan="5" class="totals-label">TVA</td>
+          <td class="line-total">{{ formatAmount(totalTax()) }}</td>
+          <td></td>
+        </tr>
+        <tr class="totals-row totals-row--grand-total">
+          <td colspan="5" class="totals-label">Total TTC</td>
+          <td class="line-total grand-total">{{ formatAmount(total()) }}</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>

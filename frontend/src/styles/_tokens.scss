@@ -1,0 +1,126 @@
+// NexusERP — Design Tokens
+// Source de vérité pour tous les styles
+
+:root {
+  // ─── Couleurs Primaires — Bleu Marine (confiance, rigueur) ────────────────
+  --color-primary-50:  #EFF6FF;
+  --color-primary-100: #DBEAFE;
+  --color-primary-200: #BFDBFE;
+  --color-primary-300: #93C5FD;
+  --color-primary-400: #60A5FA;
+  --color-primary-500: #3B82F6;
+  --color-primary-600: #1E40AF;   // Bleu marine principal
+  --color-primary-700: #1E3A8A;
+  --color-primary-800: #1E3167;
+  --color-primary-900: #0F172A;
+
+  // ─── Accent — Vert Émeraude (validation, santé, croissance) ──────────────
+  --color-accent-300: #6EE7B7;
+  --color-accent-400: #34D399;
+  --color-accent-500: #10B981;
+  --color-accent-600: #059669;
+  --color-accent-700: #047857;
+
+  // ─── Semantic ─────────────────────────────────────────────────────────────
+  --color-success:     #10B981;
+  --color-success-bg:  #ECFDF5;
+  --color-warning:     #F59E0B;
+  --color-warning-bg:  #FFFBEB;
+  --color-error:       #EF4444;
+  --color-error-bg:    #FEF2F2;
+  --color-info:        #3B82F6;
+  --color-info-bg:     #EFF6FF;
+
+  // ─── Neutrals ─────────────────────────────────────────────────────────────
+  --color-neutral-50:  #F8FAFC;
+  --color-neutral-100: #F1F5F9;
+  --color-neutral-200: #E2E8F0;
+  --color-neutral-300: #CBD5E1;
+  --color-neutral-400: #94A3B8;
+  --color-neutral-500: #64748B;
+  --color-neutral-600: #475569;
+  --color-neutral-700: #334155;
+  --color-neutral-800: #1E293B;
+  --color-neutral-900: #0F172A;
+
+  // ─── Typographie ──────────────────────────────────────────────────────────
+  --font-display: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-body:    'DM Sans', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Fira Code', monospace;
+
+  --text-xs:   0.75rem;    // 12px
+  --text-sm:   0.875rem;   // 14px
+  --text-base: 1rem;       // 16px
+  --text-lg:   1.125rem;   // 18px
+  --text-xl:   1.25rem;    // 20px
+  --text-2xl:  1.5rem;     // 24px
+  --text-3xl:  1.875rem;   // 30px
+  --text-4xl:  2.25rem;    // 36px
+
+  --font-normal:  400;
+  --font-medium:  500;
+  --font-semibold: 600;
+  --font-bold:    700;
+  --font-extrabold: 800;
+
+  // ─── Espacement (base 4px) ────────────────────────────────────────────────
+  --space-0:   0;
+  --space-1:   0.25rem;   // 4px
+  --space-2:   0.5rem;    // 8px
+  --space-3:   0.75rem;   // 12px
+  --space-4:   1rem;      // 16px
+  --space-5:   1.25rem;   // 20px
+  --space-6:   1.5rem;    // 24px
+  --space-8:   2rem;      // 32px
+  --space-10:  2.5rem;    // 40px
+  --space-12:  3rem;      // 48px
+  --space-16:  4rem;      // 64px
+  --space-20:  5rem;      // 80px
+  --space-24:  6rem;      // 96px
+
+  // ─── Ombres ────────────────────────────────────────────────────────────────
+  --shadow-xs: 0 1px 2px rgba(15,23,42,0.05);
+  --shadow-sm: 0 1px 3px rgba(15,23,42,0.08), 0 1px 2px rgba(15,23,42,0.04);
+  --shadow-md: 0 4px 6px rgba(15,23,42,0.07), 0 2px 4px rgba(15,23,42,0.06);
+  --shadow-lg: 0 10px 15px rgba(15,23,42,0.10), 0 4px 6px rgba(15,23,42,0.05);
+  --shadow-xl: 0 20px 25px rgba(15,23,42,0.10), 0 8px 10px rgba(15,23,42,0.04);
+  --shadow-glow: 0 0 0 3px rgba(30,64,175,0.15);
+  --shadow-glow-accent: 0 0 0 3px rgba(16,185,129,0.20);
+
+  // ─── Border Radius ─────────────────────────────────────────────────────────
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  // ─── Transitions ──────────────────────────────────────────────────────────
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  // ─── Z-index ──────────────────────────────────────────────────────────────
+  --z-dropdown:  100;
+  --z-sticky:    200;
+  --z-overlay:   300;
+  --z-modal:     400;
+  --z-toast:     500;
+  --z-tooltip:   600;
+
+  // ─── Breakpoints (usage via media queries) ─────────────────────────────────
+  // sm: 640px | md: 768px | lg: 1024px | xl: 1280px | 2xl: 1536px
+
+  // ─── Sidebar ──────────────────────────────────────────────────────────────
+  --sidebar-width: 260px;
+  --sidebar-width-collapsed: 64px;
+  --header-height: 64px;
+}
+
+// Mode sombre (optionnel — futur)
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-neutral-50: #0F172A;
+    --color-neutral-900: #F8FAFC;
+  }
+}

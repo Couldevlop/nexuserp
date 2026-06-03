@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Code de vérification — NexusERP</title>
+    <style>
+        body { font-family: 'DM Sans', Arial, sans-serif; background: #F8FAFC; margin: 0; padding: 0; }
+        .container { max-width: 480px; margin: 32px auto; background: #fff; border-radius: 16px;
+                     box-shadow: 0 4px 16px rgba(15,23,42,0.12); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #1E40AF, #1E3A8A); padding: 32px 40px; text-align: center; }
+        .header h1 { color: #fff; margin: 0; font-size: 22px; font-weight: 700; }
+        .body { padding: 40px; text-align: center; }
+        .code-box { background: #EFF6FF; border: 2px dashed #1E40AF; border-radius: 12px;
+                    padding: 24px; margin: 28px 0; }
+        .code { font-size: 40px; font-weight: 800; color: #1E40AF; letter-spacing: 8px;
+                font-family: 'JetBrains Mono', monospace; }
+        .expiry { color: #64748B; font-size: 13px; margin-top: 8px; }
+        .warning { background: #FEF2F2; border-radius: 8px; padding: 12px 16px; margin: 20px 0;
+                   font-size: 13px; color: #991B1B; }
+        .footer { background: #F1F5F9; padding: 20px 40px; text-align: center; }
+        .footer p { color: #64748B; font-size: 12px; margin: 4px 0; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🔐 NexusERP</h1>
+    </div>
+    <div class="body">
+        <p>Bonjour <strong th:text="${recipientName}">Utilisateur</strong>,</p>
+        <p>Voici votre code de vérification à usage unique :</p>
+
+        <div class="code-box">
+            <div class="code" th:text="${otpCode}">000000</div>
+            <p class="expiry">Valide pendant <strong>5 minutes</strong></p>
+        </div>
+
+        <div class="warning">
+            ⚠️ Ne partagez jamais ce code. NexusERP ne vous demandera jamais votre code par téléphone ou email.
+        </div>
+
+        <p style="color: #64748B; font-size: 13px;">
+            Si vous n'avez pas demandé ce code, ignorez cet email et
+            <a href="#" style="color: #1E40AF;">signalez une activité suspecte</a>.
+        </p>
+    </div>
+    <div class="footer">
+        <p>© 2026 NexusERP · Sécurité Zero-Trust</p>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<div class="nx-page-header">
+  <div class="nx-page-header__content">
+    <h1 class="nx-page-header__title">Fournisseurs</h1>
+    <p class="nx-page-header__subtitle">
+      {{ totalItems() }} fournisseur{{ totalItems() !== 1 ? 's' : '' }}
+    </p>
+  </div>
+</div>
+
+<!-- Filters bar -->
+<div class="filters-bar" role="search" aria-label="Recherche fournisseurs">
+  <div class="filters-bar__search">
+    <input
+      type="search"
+      class="nx-input"
+      placeholder="Rechercher (nom, email, code…)"
+      [value]="searchQuery()"
+      (input)="onSearch($any($event.target).value)"
+      aria-label="Rechercher des fournisseurs"
+    />
+  </div>
+</div>
+
+<div class="nx-card">
+  <div class="nx-card__body" style="padding: 0;">
+    @if (isLoading()) {
+      <div class="loading-state" role="status" aria-live="polite" aria-label="Chargement des fournisseurs">
+        @for (i of [1,2,3,4,5]; track i) {
+          <div class="skeleton-row">
+            <div class="nx-skeleton" style="height: 1rem; width: 12%;"></div>
+            <div class="nx-skeleton" style="height: 1rem; width: 24%;"></div>
+            <div class="nx-skeleton" style="height: 1rem; width: 22%;"></div>
+            <div class="nx-skeleton" style="height: 1rem; width: 14%;"></div>
+          </div>
+        }
+      </div>
+    } @else if (filteredSuppliers().length === 0) {
+      <div class="nx-empty-state">
+        <div class="nx-empty-state__icon" aria-hidden="true">🏭</div>
+        <h3 class="nx-empty-state__title">
+          @if (hasError()) {
+            Module fournisseurs indisponible
+          } @else if (searchQuery()) {
+            Aucun fournisseur trouvé
+          } @else {
+            Aucun fournisseur
+          }
+        </h3>
+        <p class="nx-empty-state__text">
+          @if (hasError()) {
+            La gestion des fournisseurs sera disponible prochainement.
+          } @else if (searchQuery()) {
+            Aucun fournisseur ne correspond à votre recherche.
+          } @else {
+            Les fournisseurs apparaîtront ici une fois créés.
+          }
+        </p>
+      </div>
+    } @else {
+      <table class="nx-table" aria-label="Liste des fournisseurs">
+        <thead>
+          <tr>
+            <th scope="col">Code</th>
+            <th scope="col">Nom</th>
+            <th scope="col">Contact</th>
+            <th scope="col">Email</th>
+            <th scope="col">Téléphone</th>
+            <th scope="col">Pays</th>
+            <th scope="col">Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (s of filteredSuppliers(); track s.id) {
+            <tr>
+              <td data-label="Code" class="code-cell">{{ s.code ?? '—' }}</td>
+              <td data-label="Nom" class="name-cell">{{ s.name }}</td>
+              <td data-label="Contact">{{ s.contactName ?? '—' }}</td>
+              <td data-label="Email">{{ s.email ?? '—' }}</td>
+              <td data-label="Téléphone">{{ s.phone ?? '—' }}</td>
+              <td data-label="Pays">{{ s.country ?? '—' }}</td>
+              <td data-label="Statut">
+                @if (s.status) {
+                  <span class="nx-badge" [ngClass]="statusBadgeClass[s.status]">
+                    {{ statusLabel[s.status] }}
+                  </span>
+                } @else {
+                  —
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      @if (totalPages() > 1) {
+        <nav class="pagination" aria-label="Pagination des fournisseurs">
+          <button class="nx-btn nx-btn--ghost pagination__btn"
+                  [disabled]="currentPage() === 0"
+                  (click)="goToPage(currentPage() - 1)"
+                  aria-label="Page précédente">
+            ← Précédent
+          </button>
+          <div class="pagination__pages">
+            @for (p of getPages(); track p) {
+              @if (p < 3 || p > totalPages() - 3 || (p >= currentPage() - 1 && p <= currentPage() + 1)) {
+                <button class="pagination__page"
+                        [class.pagination__page--active]="p === currentPage()"
+                        (click)="goToPage(p)"
+                        [attr.aria-label]="'Page ' + (p + 1)"
+                        [attr.aria-current]="p === currentPage() ? 'page' : null">
+                  {{ p + 1 }}
+                </button>
+              }
+            }
+          </div>
+          <button class="nx-btn nx-btn--ghost pagination__btn"
+                  [disabled]="currentPage() >= totalPages() - 1"
+                  (click)="goToPage(currentPage() + 1)"
+                  aria-label="Page suivante">
+            Suivant →
+          </button>
+        </nav>
+      }
+    }
+  </div>
+</div>

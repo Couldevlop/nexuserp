@@ -1,0 +1,112 @@
+.loading-state {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.skeleton-row {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  padding: var(--space-4) var(--space-4);
+  border-bottom: 1px solid var(--color-neutral-100);
+}
+
+.payslip-employee {
+  display: block;
+  font-weight: 600;
+  color: var(--color-primary-600);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.payslip-number {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-neutral-500);
+}
+
+.amount-cell {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.actions-cell {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.action-btn {
+  font-size: 0.8125rem;
+  padding: 0.25rem 0.625rem;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+// Responsive — la table devient des cartes empilées sur mobile
+@media (max-width: 640px) {
+  .nx-table thead {
+    display: none;
+  }
+
+  .nx-table,
+  .nx-table tbody,
+  .nx-table tr,
+  .nx-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .nx-table tr {
+    border-bottom: 1px solid var(--color-neutral-200);
+    padding: var(--space-2) 0;
+  }
+
+  .nx-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-3);
+    text-align: right;
+    border: none;
+    padding: var(--space-1) var(--space-4);
+    white-space: normal;
+
+    &::before {
+      content: attr(data-label);
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--color-neutral-500);
+      text-align: left;
+    }
+  }
+
+  .actions-cell {
+    justify-content: flex-end;
+
+    &::before {
+      content: '';
+    }
+  }
+}

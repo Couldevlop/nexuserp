@@ -1,0 +1,141 @@
+<div class="nx-page-header">
+  <div class="nx-page-header__content">
+    <h1 class="nx-page-header__title">Tableau de bord — Stocks</h1>
+    <p class="nx-page-header__subtitle">Vue d'ensemble des articles et alertes</p>
+  </div>
+  <div class="nx-page-header__actions">
+    <a routerLink="/inventory/movements" class="nx-btn nx-btn--ghost">Mouvements</a>
+    <a routerLink="/inventory/products/new" class="nx-btn nx-btn--primary">+ Nouvel article</a>
+  </div>
+</div>
+
+<!-- KPI cards -->
+<div class="kpi-grid">
+  <div class="nx-card kpi-card">
+    <div class="nx-card__body">
+      <span class="kpi-card__label">Références totales</span>
+      @if (isLoading()) {
+        <div class="nx-skeleton kpi-card__skeleton"></div>
+      } @else if (hasError()) {
+        <span class="kpi-card__value">—</span>
+      } @else {
+        <span class="kpi-card__value">{{ totalReferences() | number }}</span>
+      }
+      <span class="kpi-card__sub">Articles actifs</span>
+    </div>
+  </div>
+
+  <div class="nx-card kpi-card kpi-card--alert">
+    <div class="nx-card__body">
+      <span class="kpi-card__label">Ruptures de stock</span>
+      @if (isLoading()) {
+        <div class="nx-skeleton kpi-card__skeleton"></div>
+      } @else if (hasError()) {
+        <span class="kpi-card__value">—</span>
+      } @else {
+        <span class="kpi-card__value kpi-card__value--danger">{{ outOfStockCount() | number }}</span>
+      }
+      <span class="kpi-card__sub">{{ lowStockCount() }} en réapprovisionnement</span>
+    </div>
+  </div>
+
+  <div class="nx-card kpi-card">
+    <div class="nx-card__body">
+      <span class="kpi-card__label">Valeur du stock</span>
+      @if (isLoading()) {
+        <div class="nx-skeleton kpi-card__skeleton"></div>
+      } @else if (stockValue() === null) {
+        <span class="kpi-card__value">—</span>
+        <span class="kpi-card__sub">Coût moyen non renseigné</span>
+      } @else {
+        <span class="kpi-card__value">{{ stockValue() | number:'1.0-0' }} <small>{{ stockCurrency() }}</small></span>
+        <span class="kpi-card__sub">Coût moyen pondéré</span>
+      }
+    </div>
+  </div>
+
+  <div class="nx-card kpi-card kpi-card--warning">
+    <div class="nx-card__body">
+      <span class="kpi-card__label">Alertes péremption</span>
+      @if (isLoading()) {
+        <div class="nx-skeleton kpi-card__skeleton"></div>
+      } @else if (expiryAlertCount() === null) {
+        <span class="kpi-card__value">—</span>
+        <span class="kpi-card__sub">Suivi non disponible</span>
+      } @else {
+        <span class="kpi-card__value kpi-card__value--warning">{{ expiryAlertCount() }}</span>
+        <span class="kpi-card__sub">Lots proches de péremption</span>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Low-stock list -->
+<div class="nx-card">
+  <div class="nx-card__header">
+    <h2 class="nx-card__title">Articles à réapprovisionner</h2>
+    <a routerLink="/inventory/products" class="nx-btn nx-btn--ghost"
+       style="font-size: 0.8125rem; padding: 0.25rem 0.5rem;">Tous les articles →</a>
+  </div>
+  <div class="nx-card__body" style="padding: 0;">
+    @if (isLoading()) {
+      <div class="loading-state" role="status" aria-live="polite">
+        <span class="sr-only">Chargement…</span>
+        @for (i of [1,2,3,4]; track i) {
+          <div class="skeleton-row">
+            <div class="nx-skeleton" style="height: 1rem; width: 14%;"></div>
+            <div class="nx-skeleton" style="height: 1rem; width: 30%;"></div>
+            <div class="nx-skeleton" style="height: 1rem; width: 10%;"></div>
+            <div class="nx-skeleton" style="height: 1rem; width: 10%;"></div>
+          </div>
+        }
+      </div>
+    } @else if (hasError()) {
+      <div class="nx-empty-state">
+        <div class="nx-empty-state__icon" aria-hidden="true">⚠️</div>
+        <h3 class="nx-empty-state__title">Données indisponibles</h3>
+        <p class="nx-empty-state__text">Impossible de charger les articles pour le moment.</p>
+      </div>
+    } @else if (lowStockProducts().length === 0) {
+      <div class="nx-empty-state">
+        <div class="nx-empty-state__icon" aria-hidden="true">✅</div>
+        <h3 class="nx-empty-state__title">Aucune alerte</h3>
+        <p class="nx-empty-state__text">Tous les articles sont au-dessus de leur seuil de réapprovisionnement.</p>
+      </div>
+    } @else {
+      <div class="table-scroll">
+        <table class="nx-table" aria-label="Articles à réapprovisionner">
+          <thead>
+            <tr>
+              <th scope="col">Code</th>
+              <th scope="col">Désignation</th>
+              <th scope="col" class="num-col">En stock</th>
+              <th scope="col" class="num-col">Seuil</th>
+              <th scope="col"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of lowStockProducts(); track trackById($index, p)) {
+              <tr class="low-row">
+                <td>
+                  <a [routerLink]="['/inventory/products', p.id]" class="code-link">{{ p.productCode }}</a>
+                </td>
+                <td>{{ p.name }}</td>
+                <td class="num-col">
+                  <span class="nx-badge" [ngClass]="p.quantityOnHand <= 0 ? 'nx-badge--error' : 'nx-badge--warning'">
+                    {{ p.quantityOnHand | number:'1.0-3' }} {{ p.unit }}
+                  </span>
+                </td>
+                <td class="num-col">{{ p.reorderPoint | number:'1.0-3' }}</td>
+                <td class="actions-cell">
+                  <a [routerLink]="['/inventory/products', p.id]" class="nx-btn nx-btn--ghost"
+                     style="font-size: 0.8125rem; padding: 0.25rem 0.5rem;">Voir →</a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>

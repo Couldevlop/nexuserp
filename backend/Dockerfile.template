@@ -1,0 +1,17 @@
+# Template Dockerfile — NexusERP microservices Java 21
+# Usage : copier dans chaque backend/services/<service>/Dockerfile
+# puis remplacer SERVICE_JAR par le nom du jar du service
+
+FROM eclipse-temurin:21-jdk-alpine AS builder
+WORKDIR /app
+COPY . .
+RUN ./gradlew :backend:services:SERVICE_NAME:bootJar -x test --no-daemon
+
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+RUN addgroup -S nexus && adduser -S nexus -G nexus
+COPY --from=builder /app/backend/services/SERVICE_NAME/build/libs/*.jar app.jar
+RUN chown nexus:nexus app.jar
+USER nexus
+EXPOSE 8080
+ENTRYPOINT ["java", "-XX:+UseVirtualThreads", "-jar", "app.jar"]

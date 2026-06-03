@@ -1,0 +1,119 @@
+.filters-bar {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  flex-wrap: wrap;
+  align-items: flex-end;
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 160px;
+
+    @media (max-width: 480px) { width: 100%; }
+  }
+}
+
+.date-label {
+  font-size: 0.75rem;
+  color: var(--color-neutral-500, #64748b);
+}
+
+.loading-state {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+}
+
+.skeleton-row {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-neutral-100, #f1f5f9);
+}
+
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+.num-col { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+.date-cell {
+  white-space: nowrap;
+  font-size: 0.8125rem;
+  color: var(--color-neutral-600, #475569);
+}
+
+.article-link {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+
+  &:hover .article-code { text-decoration: underline; }
+}
+
+.article-code {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-primary-600);
+}
+
+.article-name {
+  font-size: 0.8125rem;
+  color: var(--color-neutral-600, #475569);
+}
+
+.qty-cell { font-weight: 600; }
+
+.unit {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--color-neutral-500, #64748b);
+}
+
+.warehouse-cell, .ref-cell {
+  font-size: 0.8125rem;
+  color: var(--color-neutral-600, #475569);
+  white-space: nowrap;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-neutral-100, #f1f5f9);
+
+  &__btn {
+    font-size: 0.875rem;
+    &:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+  }
+
+  &__pages { display: flex; gap: var(--space-1); align-items: center; }
+
+  &__page {
+    min-width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--color-neutral-200, #e2e8f0);
+    background: white;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover { border-color: var(--color-primary-400, #60a5fa); color: var(--color-primary-600); }
+    &--active { background: var(--color-primary-600); border-color: var(--color-primary-600); color: white; font-weight: 600; }
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+}

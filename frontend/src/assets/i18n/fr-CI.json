@@ -1,0 +1,83 @@
+{
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "export": "Exporter",
+    "import": "Importer",
+    "loading": "Chargement…",
+    "noData": "Aucune donnée",
+    "error": "Une erreur est survenue",
+    "success": "Opération réussie",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "close": "Fermer",
+    "all": "Tous",
+    "actions": "Actions",
+    "status": "Statut",
+    "date": "Date",
+    "amount": "Montant",
+    "total": "Total",
+    "currency": "Devise",
+    "name": "Nom",
+    "required": "Obligatoire",
+    "seeAll": "Voir tout"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "finance": "Finance & Comptabilité",
+    "procurement": "Approvisionnements",
+    "inventory": "Gestion des stocks",
+    "sales": "Commercial",
+    "hr": "RH & Paie",
+    "production": "Production",
+    "reporting": "États financiers",
+    "admin": "Administration",
+    "settings": "Paramètres",
+    "logout": "Déconnexion",
+    "aiAssistant": "Assistant IA"
+  },
+  "finance": {
+    "invoice": {
+      "title": "Facture",
+      "titlePlural": "Factures",
+      "number": "N° Facture",
+      "create": "Nouvelle facture",
+      "customer": "Client",
+      "dueDate": "Date d'échéance",
+      "subtotal": "Montant HT",
+      "tax": "TVA (18%)",
+      "total": "Montant TTC",
+      "notes": "Observations",
+      "addLine": "+ Ajouter une ligne",
+      "status": {
+        "DRAFT": "Brouillon",
+        "SUBMITTED": "En attente de validation",
+        "APPROVED": "Validée",
+        "PAID": "Réglée",
+        "OVERDUE": "Impayée (échus)",
+        "CANCELLED": "Annulée"
+      },
+      "actions": {
+        "approve": "Valider",
+        "approving": "Validation…",
+        "submit": "Soumettre à validation",
+        "markPaid": "Marquer comme réglée",
+        "cancel": "Annuler la facture"
+      }
+    }
+  },
+  "ai": {
+    "assistant": "Assistant IA",
+    "placeholder": "Posez votre question sur vos données SYSCOHADA…",
+    "send": "Envoyer",
+    "thinking": "Analyse en cours…",
+    "greeting": "Bonjour ! Je suis votre assistant NexusERP conforme SYSCOHADA. Comment puis-je vous aider ?"
+  }
+}

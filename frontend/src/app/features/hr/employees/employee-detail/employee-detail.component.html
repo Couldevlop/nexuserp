@@ -1,0 +1,162 @@
+<nav class="nx-breadcrumb" aria-label="Fil d'Ariane">
+  <a routerLink="/hr/employees" class="nx-breadcrumb__link">Salariés</a>
+  <span class="nx-breadcrumb__sep" aria-hidden="true">/</span>
+  <span class="nx-breadcrumb__current" aria-current="page">
+    {{ employee()?.fullName ?? '…' }}
+  </span>
+</nav>
+
+@if (isLoading()) {
+  <div class="nx-card" role="status" aria-live="polite" aria-label="Chargement en cours">
+    <div class="nx-card__body detail-skeleton">
+      <div class="nx-skeleton" style="height: 2rem; width: 30%;"></div>
+      <div class="nx-skeleton" style="height: 1rem; width: 50%; margin-top: 0.5rem;"></div>
+      <div class="nx-skeleton" style="height: 12rem; margin-top: 2rem;"></div>
+    </div>
+  </div>
+} @else if (employee() !== null) {
+  @if (employee(); as e) {
+  <!-- Header -->
+  <div class="emp-detail-header">
+    <div class="emp-detail-header__left">
+      <div class="emp-avatar" aria-hidden="true">
+        {{ (e.firstName.charAt(0) || '') + (e.lastName.charAt(0) || '') }}
+      </div>
+      <div>
+        <h1 class="emp-detail-header__name">{{ e.fullName }}</h1>
+        <p class="emp-detail-header__meta">
+          <span class="emp-number">{{ e.employeeNumber }}</span>
+          @if (e.jobTitle) { · {{ e.jobTitle }} }
+        </p>
+      </div>
+      <span class="nx-badge" [ngClass]="getStatusClass(e.status)"
+            style="font-size: 0.875rem; padding: 0.35rem 0.875rem;">
+        {{ statusLabel[e.status] || e.status }}
+      </span>
+    </div>
+    <div class="emp-detail-header__actions">
+      @if (canViewPayroll()) {
+        <button class="nx-btn nx-btn--secondary" (click)="computePayslip()"
+                [disabled]="actionInProgress() !== null"
+                aria-label="Simuler le bulletin de paie">
+          @if (actionInProgress() === 'payslip') { Calcul… } @else { 💶 Simuler la paie }
+        </button>
+      }
+      <a routerLink="/hr/employees" class="nx-btn nx-btn--ghost">← Retour</a>
+    </div>
+  </div>
+
+  <!-- Meta info -->
+  <div class="emp-meta-grid">
+    <!-- Contrat -->
+    <div class="nx-card emp-meta-card">
+      <div class="nx-card__body">
+        <h2 class="emp-meta-card__title">Contrat</h2>
+        <div class="info-row">
+          <span class="info-row__label">Type</span>
+          <span class="info-row__value">{{ contractLabel[e.contractType] || e.contractType }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-row__label">Date d'embauche</span>
+          <span class="info-row__value">{{ e.hireDate | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-row__label">Pays</span>
+          <span class="info-row__value">{{ e.country }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-row__label">Salaire brut</span>
+          <span class="info-row__value info-row__value--strong">
+            {{ formatAmount(e.grossSalaryAmount, e.grossSalaryCurrency) }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coordonnées -->
+    <div class="nx-card emp-meta-card">
+      <div class="nx-card__body">
+        <h2 class="emp-meta-card__title">Coordonnées</h2>
+        <div class="info-row">
+          <span class="info-row__label">E-mail</span>
+          <span class="info-row__value">
+            @if (e.email) {
+              <a class="info-link" [href]="'mailto:' + e.email">{{ e.email }}</a>
+            } @else { — }
+          </span>
+        </div>
+        <div class="info-row">
+          <span class="info-row__label">Téléphone</span>
+          <span class="info-row__value">{{ e.phone || '—' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-row__label">Département</span>
+          <span class="info-row__value">{{ e.department || '—' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Identité -->
+    <div class="nx-card emp-meta-card">
+      <div class="nx-card__body">
+        <h2 class="emp-meta-card__title">Identité</h2>
+        <div class="info-row">
+          <span class="info-row__label">Prénom</span>
+          <span class="info-row__value">{{ e.firstName }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-row__label">Nom</span>
+          <span class="info-row__value">{{ e.lastName }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-row__label">Matricule</span>
+          <span class="info-row__value emp-number">{{ e.employeeNumber }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulletin de paie (simulation à la demande, gated HR_MANAGER) -->
+  @if (canViewPayroll()) {
+    <div class="nx-card">
+      <div class="nx-card__header">
+        <h2 class="nx-card__title">Bulletin de paie — simulation</h2>
+      </div>
+      <div class="nx-card__body">
+        @if (payslip(); as p) {
+          <div class="payslip-grid">
+            <div class="payslip-item">
+              <span class="payslip-item__label">Salaire brut</span>
+              <span class="payslip-item__value">{{ formatMoneyDto(p.grossSalary) }}</span>
+            </div>
+            <div class="payslip-item">
+              <span class="payslip-item__label">Cotisations salariales</span>
+              <span class="payslip-item__value payslip-item__value--neg">
+                − {{ formatMoneyDto(p.totalEmployeeDeductions) }}
+              </span>
+            </div>
+            <div class="payslip-item payslip-item--net">
+              <span class="payslip-item__label">Salaire net</span>
+              <span class="payslip-item__value">{{ formatMoneyDto(p.netSalary) }}</span>
+            </div>
+            <div class="payslip-item">
+              <span class="payslip-item__label">Coût employeur total</span>
+              <span class="payslip-item__value">{{ formatMoneyDto(p.totalEmployerCost) }}</span>
+            </div>
+          </div>
+          <p class="payslip-note">
+            Régime de calcul : {{ p.country }}. Simulation indicative, non contractuelle.
+          </p>
+        } @else {
+          <div class="nx-empty-state nx-empty-state--compact">
+            <div class="nx-empty-state__icon" aria-hidden="true">💶</div>
+            <p class="nx-empty-state__text">
+              Cliquez sur « Simuler la paie » pour calculer le bulletin selon le régime du pays.
+            </p>
+          </div>
+        }
+      </div>
+    </div>
+  }
+  }
+}

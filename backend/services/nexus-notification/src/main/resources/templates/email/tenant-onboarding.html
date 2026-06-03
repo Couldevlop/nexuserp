@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Bienvenue sur NexusERP</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #F8FAFC; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 32px auto; background: #fff; border-radius: 10px; box-shadow: 0 4px 16px rgba(15,23,42,.12); overflow: hidden; }
+    .header { background: linear-gradient(135deg,#1E40AF,#059669); padding: 32px; text-align: center; }
+    .header h1 { color: #fff; font-size: 26px; margin: 0 0 8px; }
+    .header p { color: rgba(255,255,255,.85); margin: 0; font-size: 14px; }
+    .body { padding: 32px; color: #0F172A; font-size: 15px; line-height: 1.6; }
+    .btn { display: inline-block; background: #1E40AF; color: #fff; padding: 14px 32px; border-radius: 6px; text-decoration: none; font-weight: bold; margin: 20px 0; }
+    .creds { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 16px 20px; margin: 16px 0; font-family: monospace; font-size: 14px; }
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li { counter-increment: step; padding: 8px 0 8px 40px; position: relative; }
+    .steps li::before { content: counter(step); position: absolute; left: 0; width: 28px; height: 28px; background: #1E40AF; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; }
+    .footer { background: #F1F5F9; padding: 16px 32px; text-align: center; color: #64748B; font-size: 12px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Bienvenue sur NexusERP!</h1>
+    <p>Intelligence at the Core of Every Decision</p>
+  </div>
+  <div class="body">
+    <p th:text="'Bonjour ' + ${recipientName} + ','">Bonjour,</p>
+    <p>Votre espace NexusERP est prêt. Voici vos informations de connexion :</p>
+    <div class="creds">
+      <p><strong>URL :</strong> <span th:text="${tenantUrl}">https://nexuserp.io</span></p>
+      <p><strong>Email :</strong> <span th:text="${recipientEmail}">admin@company.com</span></p>
+      <p><strong>Mot de passe temporaire :</strong> <span th:text="${tempPassword}">*****</span></p>
+    </div>
+    <p>Pour commencer :</p>
+    <ol class="steps">
+      <li>Connectez-vous avec vos identifiants ci-dessus</li>
+      <li>Modifiez votre mot de passe lors de la première connexion</li>
+      <li>Configurez votre authentification 2FA (recommandé)</li>
+      <li>Importez vos données via les templates XLSX</li>
+    </ol>
+    <a class="btn" th:href="${tenantUrl}" href="#">Accéder à NexusERP</a>
+  </div>
+  <div class="footer"><p>© 2026 NexusERP — Intelligence at the Core of Every Decision</p></div>
+</div>
+</body>
+</html>

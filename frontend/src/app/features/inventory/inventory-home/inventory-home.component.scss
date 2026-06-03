@@ -1,0 +1,117 @@
+// Inventory 360° Dashboard
+:host { display: block; }
+
+// ─── KPI Cards ───────────────────────────────────────────────────────────────
+.inv-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.kpi-card {
+  background: #fff; border-radius: var(--radius-lg); padding: var(--space-5);
+  box-shadow: var(--shadow-sm); border: 1px solid var(--color-neutral-100);
+  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+  &:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+  &__header { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3); }
+  &__icon { width: 40px; height: 40px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  &__label { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-neutral-500); font-weight: var(--font-semibold); flex: 1; }
+  &__value { font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--color-neutral-900); font-family: var(--font-display); margin-bottom: var(--space-2); }
+  &__footer { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); flex-wrap: wrap; }
+  &__subtitle { font-size: var(--text-xs); color: var(--color-neutral-400); }
+  &__trend {
+    font-size: var(--text-xs); font-weight: var(--font-semibold); padding: 2px 6px; border-radius: var(--radius-full);
+    &--up     { color: var(--color-accent-600); background: var(--color-success-bg); }
+    &--down   { color: #B91C1C; background: var(--color-error-bg); }
+    &--stable { color: var(--color-neutral-500); background: var(--color-neutral-100); }
+  }
+  &--blue   .kpi-card__icon { background: #EFF6FF; color: #1E40AF; }
+  &--amber  .kpi-card__icon { background: #FFFBEB; color: #B45309; }
+  &--green  .kpi-card__icon { background: #ECFDF5; color: #065F46; }
+  &--purple .kpi-card__icon { background: #F5F3FF; color: #5B21B6; }
+}
+
+// ─── Grille ─────────────────────────────────────────────────────────────────
+.inv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); @media (max-width: 1024px) { grid-template-columns: 1fr; } }
+
+// ─── Mouvements (graphe barres CSS) ─────────────────────────────────────────
+.mv-legend {
+  display: flex; align-items: center; gap: var(--space-2);
+  font-size: var(--text-xs); color: var(--color-neutral-500); font-weight: var(--font-medium);
+  &::before { content: ''; width: 10px; height: 10px; border-radius: var(--radius-sm); }
+  &--in::before { background: var(--color-primary-500); }
+  &--out::before { background: #F87171; }
+}
+
+.mv-chart {
+  display: flex; align-items: flex-end; gap: var(--space-3); height: 120px; padding: 0 var(--space-1);
+}
+
+.mv-col {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: var(--space-2);
+}
+
+.mv-bars {
+  display: flex; gap: 3px; align-items: flex-end; height: 96px; width: 100%;
+}
+
+.mv-bar {
+  flex: 1; border-radius: var(--radius-sm) var(--radius-sm) 0 0; min-height: 2px;
+  transition: height var(--transition-base);
+  &--in  { background: var(--color-primary-500); opacity: 0.85; }
+  &--out { background: #F87171; opacity: 0.85; }
+}
+
+.mv-label { font-size: var(--text-xs); color: var(--color-neutral-400); font-weight: var(--font-medium); }
+
+// ─── Catégories ──────────────────────────────────────────────────────────────
+.cat-list { display: flex; flex-direction: column; gap: var(--space-3); }
+.cat-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.cat-row {
+  &__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+  &__name { font-size: var(--text-sm); color: var(--color-neutral-700); font-weight: var(--font-medium); }
+  &__value { font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-neutral-800); font-variant-numeric: tabular-nums; }
+  &__pct { font-size: var(--text-xs); color: var(--color-neutral-400); min-width: 30px; text-align: right; }
+  &__bar { height: 6px; background: var(--color-neutral-100); border-radius: var(--radius-full); overflow: hidden; }
+  &__fill { height: 100%; border-radius: var(--radius-full); transition: width var(--transition-base); }
+}
+
+// ─── Tableau ruptures ────────────────────────────────────────────────────────
+.row--critical { background: #FEF2F2; }
+
+.sku-code {
+  font-family: var(--font-mono); font-size: 0.78rem;
+  background: var(--color-neutral-100); padding: 2px 6px; border-radius: var(--radius-sm);
+  color: var(--color-primary-600);
+}
+
+.warehouse-tag {
+  font-size: var(--text-xs); padding: 2px 8px; border-radius: var(--radius-full);
+  background: var(--color-neutral-100); color: var(--color-neutral-600); font-weight: var(--font-medium);
+}
+
+.stock-cell { display: flex; align-items: center; gap: var(--space-2); }
+.text-error   { color: var(--color-error); font-weight: var(--font-semibold); }
+.text-warning { color: #B45309; font-weight: var(--font-semibold); }
+
+.stock-mini-bar { width: 50px; height: 4px; background: var(--color-neutral-200); border-radius: var(--radius-full); overflow: hidden; }
+.stock-mini-fill {
+  height: 100%; border-radius: var(--radius-full);
+  &--critical { background: var(--color-error); }
+  &--warning  { background: var(--color-warning); }
+}
+
+// ─── DLC/DLUO ────────────────────────────────────────────────────────────────
+.expiry-list { display: flex; flex-direction: column; gap: var(--space-3); }
+.expiry-row {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
+  padding: var(--space-3); background: var(--color-neutral-50); border-radius: var(--radius-md);
+  border-left: 3px solid var(--color-warning);
+  &--critical { border-left-color: var(--color-error); background: var(--color-error-bg); }
+  &__info { display: flex; flex-direction: column; gap: 2px; }
+  &__product { font-size: var(--text-sm); color: var(--color-neutral-800); }
+  &__lot { font-size: var(--text-xs); color: var(--color-neutral-400); font-family: var(--font-mono); }
+  &__date { display: flex; flex-direction: column; align-items: flex-end; gap: var(--space-1); }
+  &__expires { font-size: var(--text-xs); color: var(--color-neutral-500); font-family: var(--font-mono); }
+}

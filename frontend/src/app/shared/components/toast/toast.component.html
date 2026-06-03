@@ -1,0 +1,16 @@
+<div class="nx-toast-container" role="region" aria-label="Notifications" aria-live="polite">
+  @for (toast of toasts(); track toast.id) {
+    <div class="nx-toast" [class]="'nx-toast--' + toast.type" role="alert">
+      <div class="nx-toast__icon">
+        @switch (toast.type) {
+          @case ('success') { ✓ }
+          @case ('error')   { ✕ }
+          @case ('warning') { ⚠ }
+          @case ('info')    { ℹ }
+        }
+      </div>
+      <p class="nx-toast__message">{{ toast.message }}</p>
+      <button class="nx-toast__close" (click)="dismiss(toast.id)" aria-label="Fermer">×</button>
+    </div>
+  }
+</div>

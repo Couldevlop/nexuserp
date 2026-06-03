@@ -1,0 +1,184 @@
+<!-- ─── En-tête ─────────────────────────────────────────────────────────────── -->
+<div class="nx-page-header">
+  <div class="nx-page-header__content">
+    <h1 class="nx-page-header__title">Gestion des Stocks</h1>
+    <p class="nx-page-header__subtitle">Vue 360° — Entrepôts, mouvements, alertes, valorisation</p>
+  </div>
+  <div class="nx-page-header__actions">
+    <a routerLink="/inventory/movements/in" class="nx-btn nx-btn--primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Entrée stock
+    </a>
+    <a routerLink="/inventory/movements/out" class="nx-btn nx-btn--secondary">Sortie stock</a>
+  </div>
+</div>
+
+<!-- ─── KPI Cards ─────────────────────────────────────────────────────────── -->
+<section class="inv-kpis" aria-label="Indicateurs stocks">
+  @for (kpi of kpis(); track kpi.label) {
+    <div class="kpi-card kpi-card--{{ kpi.color }}">
+      <div class="kpi-card__header">
+        <div class="kpi-card__icon">
+          @switch (kpi.icon) {
+            @case ('sku') {
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            }
+            @case ('alert') {
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            }
+            @case ('value') {
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            }
+            @case ('warehouse') {
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            }
+          }
+        </div>
+        <span class="kpi-card__label">{{ kpi.label }}</span>
+      </div>
+      <div class="kpi-card__value">{{ kpi.value }}</div>
+      <div class="kpi-card__footer">
+        <span class="kpi-card__subtitle">{{ kpi.subtitle }}</span>
+        @if (kpi.trend) {
+          <span class="kpi-card__trend kpi-card__trend--{{ kpi.trendDir }}">{{ kpi.trend }}</span>
+        }
+      </div>
+    </div>
+  }
+</section>
+
+<!-- ─── Grille 360° ───────────────────────────────────────────────────────── -->
+<div class="inv-grid">
+
+  <!-- Mouvements de la semaine -->
+  <section class="nx-card" aria-label="Mouvements de stock — 7 derniers jours">
+    <div class="nx-card__header">
+      <h2 class="nx-card__title">Mouvements — 7 derniers jours</h2>
+      <div style="display:flex;gap:var(--space-3);">
+        <span class="mv-legend mv-legend--in">Entrées</span>
+        <span class="mv-legend mv-legend--out">Sorties</span>
+      </div>
+    </div>
+    <div class="nx-card__body">
+      <div class="mv-chart" aria-hidden="true">
+        @for (mv of movements(); track mv.label) {
+          <div class="mv-col">
+            <div class="mv-bars">
+              <div class="mv-bar mv-bar--in" [style.height.%]="pctBar(mv.in, mv.maxVal)" [title]="'Entrées : ' + mv.in"></div>
+              <div class="mv-bar mv-bar--out" [style.height.%]="pctBar(mv.out, mv.maxVal)" [title]="'Sorties : ' + mv.out"></div>
+            </div>
+            <span class="mv-label">{{ mv.label }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Répartition par catégorie -->
+  <section class="nx-card" aria-label="Répartition par catégorie">
+    <div class="nx-card__header">
+      <h2 class="nx-card__title">Valorisation par catégorie</h2>
+      <span class="nx-badge nx-badge--neutral">284 500 €</span>
+    </div>
+    <div class="nx-card__body">
+      <div class="cat-list">
+        @for (cat of categories(); track cat.name) {
+          <div class="cat-row">
+            <div class="cat-row__header">
+              <div style="display:flex;align-items:center;gap:var(--space-2);">
+                <div class="cat-dot" [style.background]="cat.color"></div>
+                <span class="cat-row__name">{{ cat.name }}</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:var(--space-3);">
+                <span class="cat-row__value">{{ cat.value }}</span>
+                <span class="cat-row__pct">{{ cat.pct }}%</span>
+              </div>
+            </div>
+            <div class="cat-row__bar">
+              <div class="cat-row__fill" [style.width.%]="cat.pct" [style.background]="cat.color"></div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Articles en rupture / faible stock -->
+  <section class="nx-card" aria-label="Articles en rupture ou faible stock">
+    <div class="nx-card__header">
+      <h2 class="nx-card__title">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-error)" stroke-width="2.5" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Ruptures &amp; Faible stock
+      </h2>
+      <a routerLink="/inventory/alerts" class="nx-btn nx-btn--ghost nx-btn--sm">Tout →</a>
+    </div>
+    <div class="nx-card__body" style="padding:0;">
+      <table class="nx-table" aria-label="Articles en rupture">
+        <thead>
+          <tr>
+            <th scope="col">Référence</th>
+            <th scope="col">Article</th>
+            <th scope="col">Entrepôt</th>
+            <th scope="col">Stock / Min</th>
+            <th scope="col">Criticité</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of lowStockItems(); track item.sku) {
+            <tr [class.row--critical]="item.severity === 'critical'">
+              <td><code class="sku-code">{{ item.sku }}</code></td>
+              <td>{{ item.name }}</td>
+              <td><span class="warehouse-tag">{{ item.warehouse }}</span></td>
+              <td>
+                <div class="stock-cell">
+                  <span [class.text-error]="item.severity === 'critical'" [class.text-warning]="item.severity === 'warning'">
+                    {{ item.currentQty }} {{ item.unit }}
+                  </span>
+                  <div class="stock-mini-bar">
+                    <div class="stock-mini-fill stock-mini-fill--{{ item.severity }}"
+                         [style.width.%]="pctBar(item.currentQty, item.minQty)"></div>
+                  </div>
+                  <span style="color:var(--color-neutral-400);font-size:var(--text-xs);">/ {{ item.minQty }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="nx-badge" [class.nx-badge--error]="item.severity === 'critical'" [class.nx-badge--warning]="item.severity === 'warning'">
+                  {{ item.severity === 'critical' ? 'Critique' : 'Attention' }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Alertes péremption -->
+  <section class="nx-card" aria-label="Alertes péremption">
+    <div class="nx-card__header">
+      <h2 class="nx-card__title">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-warning)" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        DLC / DLUO à surveiller
+      </h2>
+    </div>
+    <div class="nx-card__body">
+      <div class="expiry-list">
+        @for (e of expiryAlerts(); track e.lotNumber) {
+          <div class="expiry-row" [class.expiry-row--critical]="e.daysLeft <= 20">
+            <div class="expiry-row__info">
+              <strong class="expiry-row__product">{{ e.product }}</strong>
+              <span class="expiry-row__lot">{{ e.lotNumber }} — {{ e.qty }} {{ e.unit }}</span>
+            </div>
+            <div class="expiry-row__date">
+              <span class="expiry-row__expires">{{ e.expiresAt }}</span>
+              <span class="nx-badge" [class.nx-badge--error]="e.daysLeft <= 20" [class.nx-badge--warning]="e.daysLeft > 20 && e.daysLeft <= 45" [class.nx-badge--success]="e.daysLeft > 45">
+                J–{{ e.daysLeft }}
+              </span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+</div>

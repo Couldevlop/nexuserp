@@ -1,0 +1,137 @@
+<nav class="nx-breadcrumb" aria-label="Fil d'Ariane">
+  <a routerLink="/production/work-orders" class="nx-breadcrumb__link">Ordres de fabrication</a>
+  <span class="nx-breadcrumb__sep" aria-hidden="true">/</span>
+  <span class="nx-breadcrumb__current" aria-current="page">Nouvel ordre</span>
+</nav>
+
+<div class="nx-page-header">
+  <div class="nx-page-header__content">
+    <h1 class="nx-page-header__title">Nouvel ordre de fabrication</h1>
+  </div>
+  <div class="nx-page-header__actions">
+    <a routerLink="/production/work-orders" class="nx-btn nx-btn--ghost">Annuler</a>
+    <button class="nx-btn nx-btn--primary" type="button" (click)="submit()"
+            [disabled]="isSubmitting() || form.invalid"
+            aria-label="Enregistrer l'ordre de fabrication">
+      @if (isSubmitting()) { Enregistrement… } @else { Enregistrer }
+    </button>
+  </div>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <div class="create-grid">
+
+    <!-- Product / quantity -->
+    <div class="nx-card">
+      <div class="nx-card__header">
+        <h2 class="nx-card__title">Produit</h2>
+      </div>
+      <div class="nx-card__body">
+        <div class="nx-form-group">
+          <label class="nx-label" for="productName">
+            Produit / Référence <span class="required" aria-hidden="true">*</span>
+          </label>
+          <input id="productName" type="text" class="nx-input"
+                 formControlName="productName"
+                 placeholder="Désignation du produit fini"
+                 required aria-required="true"
+                 [attr.aria-invalid]="controlInvalid('productName')" />
+          @if (controlInvalid('productName')) {
+            <p class="field-error" role="alert">Le produit est obligatoire.</p>
+          }
+        </div>
+        <div class="nx-form-group">
+          <label class="nx-label" for="productId">Code article</label>
+          <input id="productId" type="text" class="nx-input"
+                 formControlName="productId"
+                 placeholder="Référence interne (optionnel)" />
+        </div>
+        <div class="nx-form-group">
+          <label class="nx-label" for="quantityPlanned">
+            Quantité planifiée <span class="required" aria-hidden="true">*</span>
+          </label>
+          <input id="quantityPlanned" type="number" class="nx-input nx-input--number"
+                 formControlName="quantityPlanned"
+                 min="0.001" step="1"
+                 required aria-required="true"
+                 [attr.aria-invalid]="controlInvalid('quantityPlanned')" />
+          @if (controlInvalid('quantityPlanned')) {
+            <p class="field-error" role="alert">La quantité doit être strictement positive.</p>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Planning / priority -->
+    <div class="nx-card">
+      <div class="nx-card__header">
+        <h2 class="nx-card__title">Planification</h2>
+      </div>
+      <div class="nx-card__body">
+        <div class="settings-grid">
+          <div class="nx-form-group">
+            <label class="nx-label" for="plannedStartDate">Début prévu</label>
+            <input id="plannedStartDate" type="date" class="nx-input"
+                   formControlName="plannedStartDate" />
+          </div>
+          <div class="nx-form-group">
+            <label class="nx-label" for="plannedEndDate">Fin prévue</label>
+            <input id="plannedEndDate" type="date" class="nx-input"
+                   formControlName="plannedEndDate"
+                   [attr.aria-invalid]="dateRangeInvalid()" />
+          </div>
+        </div>
+        @if (dateRangeInvalid()) {
+          <p class="field-error" role="alert">La date de fin doit être postérieure à la date de début.</p>
+        }
+        <div class="settings-grid">
+          <div class="nx-form-group">
+            <label class="nx-label" for="priority">Priorité</label>
+            <select id="priority" class="nx-input" formControlName="priority"
+                    aria-label="Choisir une priorité">
+              @for (p of priorities; track p.value) {
+                <option [value]="p.value">{{ p.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="nx-form-group">
+            <label class="nx-label" for="workcenter">Poste de charge</label>
+            <input id="workcenter" type="text" class="nx-input"
+                   formControlName="workcenter"
+                   placeholder="Ligne / atelier (optionnel)" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Advanced (BOM / routing / notes) -->
+  <div class="nx-card">
+    <div class="nx-card__header">
+      <h2 class="nx-card__title">Détails complémentaires</h2>
+    </div>
+    <div class="nx-card__body">
+      <div class="settings-grid">
+        <div class="nx-form-group">
+          <label class="nx-label" for="bomId">Nomenclature (BOM)</label>
+          <input id="bomId" type="text" class="nx-input"
+                 formControlName="bomId"
+                 placeholder="Identifiant nomenclature (optionnel)" />
+        </div>
+        <div class="nx-form-group">
+          <label class="nx-label" for="routingId">Gamme opératoire</label>
+          <input id="routingId" type="text" class="nx-input"
+                 formControlName="routingId"
+                 placeholder="Identifiant gamme (optionnel)" />
+        </div>
+      </div>
+      <div class="nx-form-group">
+        <label class="nx-label" for="notes">Notes</label>
+        <textarea id="notes" class="nx-input" rows="4"
+                  formControlName="notes"
+                  placeholder="Instructions de production, consignes particulières…"></textarea>
+      </div>
+    </div>
+  </div>
+</form>

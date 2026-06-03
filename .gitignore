@@ -1,0 +1,56 @@
+# ─── Java / Maven ───────────────────────────────────────────────
+target/
+*.class
+*.jar
+*.war
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/timing.properties
+
+# ─── Gradle (si utilisé) ────────────────────────────────────────
+.gradle/
+build/
+
+# ─── Node / Angular ─────────────────────────────────────────────
+node_modules/
+dist/
+.angular/
+coverage/
+npm-debug.log*
+yarn-error.log*
+*.tsbuildinfo
+
+# ─── Python / AI service ────────────────────────────────────────
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+.coverage
+coverage.xml
+
+# ─── Secrets / Environnement (NE JAMAIS committer) ──────────────
+.env
+.env.*
+!.env.example
+*.local
+*.pem
+*.key
+secrets/
+
+# ─── IDE / Éditeurs ─────────────────────────────────────────────
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# ─── OS ─────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ─── Logs / divers ──────────────────────────────────────────────
+*.log
+logs/
+tmp/

@@ -1,0 +1,11 @@
+node_modules
+dist
+.angular
+.git
+.gitignore
+*.md
+coverage
+e2e
+.eslintrc*
+.prettierrc*
+karma.conf.js

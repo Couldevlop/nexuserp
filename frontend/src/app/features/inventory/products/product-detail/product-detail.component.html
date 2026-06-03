@@ -1,0 +1,223 @@
+<nav class="nx-breadcrumb" aria-label="Fil d'Ariane">
+  <a routerLink="/inventory/products" class="nx-breadcrumb__link">Articles</a>
+  <span class="nx-breadcrumb__sep" aria-hidden="true">/</span>
+  <span class="nx-breadcrumb__current" aria-current="page">
+    {{ product()?.productCode ?? 'Détail' }}
+  </span>
+</nav>
+
+@if (isLoading()) {
+  <div class="detail-skeleton" role="status" aria-live="polite">
+    <span class="sr-only">Chargement de l'article…</span>
+    <div class="nx-skeleton" style="height: 2rem; width: 40%;"></div>
+    <div class="nx-skeleton" style="height: 8rem; width: 100%; border-radius: var(--radius-md);"></div>
+    <div class="nx-skeleton" style="height: 12rem; width: 100%; border-radius: var(--radius-md);"></div>
+  </div>
+} @else {
+  @if (product(); as p) {
+  <div class="detail-header">
+    <div class="detail-header__left">
+      <h1 class="detail-header__code">{{ p.productCode }}</h1>
+      <span class="nx-badge" [ngClass]="statusBadge[p.status]">{{ statusLabel[p.status] }}</span>
+      @if (isLowStock()) {
+        <span class="nx-badge nx-badge--warning">⚠ À réapprovisionner</span>
+      }
+    </div>
+    <div class="detail-header__actions">
+      <button class="nx-btn nx-btn--secondary" (click)="openMovement('ADJUSTMENT')"
+              aria-label="Ajuster le stock">Ajuster</button>
+      <button class="nx-btn nx-btn--primary" (click)="openMovement('IN')"
+              aria-label="Enregistrer un mouvement de stock">Mouvement de stock</button>
+    </div>
+  </div>
+
+  <h2 class="detail-title">{{ p.name }}</h2>
+  @if (p.description) {
+    <p class="detail-desc">{{ p.description }}</p>
+  }
+
+  <!-- KPI stock -->
+  <div class="stock-cards">
+    <div class="nx-card stock-card">
+      <div class="nx-card__body">
+        <span class="stock-card__label">En stock</span>
+        <span class="stock-card__value" [class.stock-card__value--low]="isLowStock()">
+          {{ p.quantityOnHand | number:'1.0-3' }} <small>{{ p.unit }}</small>
+        </span>
+      </div>
+    </div>
+    <div class="nx-card stock-card">
+      <div class="nx-card__body">
+        <span class="stock-card__label">Réservé</span>
+        <span class="stock-card__value">{{ p.quantityReserved | number:'1.0-3' }} <small>{{ p.unit }}</small></span>
+      </div>
+    </div>
+    <div class="nx-card stock-card">
+      <div class="nx-card__body">
+        <span class="stock-card__label">Disponible</span>
+        <span class="stock-card__value">{{ p.availableQuantity | number:'1.0-3' }} <small>{{ p.unit }}</small></span>
+      </div>
+    </div>
+    <div class="nx-card stock-card">
+      <div class="nx-card__body">
+        <span class="stock-card__label">Seuil réappro</span>
+        <span class="stock-card__value">{{ p.reorderPoint | number:'1.0-3' }} <small>{{ p.unit }}</small></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-grid">
+    <!-- Caractéristiques -->
+    <div class="nx-card">
+      <div class="nx-card__header"><h3 class="nx-card__title">Caractéristiques</h3></div>
+      <div class="nx-card__body">
+        <div class="info-row"><span class="info-row__label">Catégorie</span><span class="info-row__value">{{ p.category || '—' }}</span></div>
+        <div class="info-row"><span class="info-row__label">Unité</span><span class="info-row__value">{{ p.unit }}</span></div>
+        <div class="info-row"><span class="info-row__label">Valorisation</span><span class="info-row__value">{{ valuationLabel[p.valuationMethod] }}</span></div>
+        <div class="info-row">
+          <span class="info-row__label">Coût moyen</span>
+          <span class="info-row__value">
+            @if (p.averageCostAmount != null) {
+              {{ p.averageCostAmount | number:'1.2-4' }} {{ p.averageCostCurrency }}
+            } @else { — }
+          </span>
+        </div>
+        <div class="info-row"><span class="info-row__label">Qté réappro</span><span class="info-row__value">{{ p.reorderQuantity | number:'1.0-3' }} {{ p.unit }}</span></div>
+        <div class="info-row"><span class="info-row__label">Stock de sécurité</span><span class="info-row__value">{{ p.safetyStock | number:'1.0-3' }} {{ p.unit }}</span></div>
+      </div>
+    </div>
+
+    <!-- Traçabilité -->
+    <div class="nx-card">
+      <div class="nx-card__header"><h3 class="nx-card__title">Traçabilité</h3></div>
+      <div class="nx-card__body">
+        <div class="info-row">
+          <span class="info-row__label">Suivi par lot</span>
+          <span class="nx-badge" [ngClass]="p.lotTracked ? 'nx-badge--info' : 'nx-badge--neutral'">
+            {{ p.lotTracked ? 'Oui' : 'Non' }}
+          </span>
+        </div>
+        <div class="info-row">
+          <span class="info-row__label">N° de série</span>
+          <span class="nx-badge" [ngClass]="p.serialTracked ? 'nx-badge--info' : 'nx-badge--neutral'">
+            {{ p.serialTracked ? 'Oui' : 'Non' }}
+          </span>
+        </div>
+        <div class="info-row">
+          <span class="info-row__label">Péremption</span>
+          <span class="nx-badge" [ngClass]="p.expiryTracked ? 'nx-badge--info' : 'nx-badge--neutral'">
+            {{ p.expiryTracked ? 'Oui' : 'Non' }}
+          </span>
+        </div>
+        <div class="info-row"><span class="info-row__label">Entrepôt</span><span class="info-row__value">{{ p.warehouseId || '—' }}</span></div>
+        <div class="info-row"><span class="info-row__label">Emplacement</span><span class="info-row__value">{{ p.warehouseLocation || '—' }}</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stock par entrepôt -->
+  <div class="nx-card">
+    <div class="nx-card__header"><h3 class="nx-card__title">Stock par entrepôt / emplacement</h3></div>
+    <div class="nx-card__body" style="padding: 0;">
+      @if (warehouseStock().length === 0) {
+        <div class="nx-empty-state nx-empty-state--compact">
+          <p class="nx-empty-state__text">
+            Détail par emplacement indisponible. Stock global :
+            <strong>{{ p.quantityOnHand | number:'1.0-3' }} {{ p.unit }}</strong>
+            @if (p.warehouseId) { · entrepôt {{ p.warehouseId }} }
+          </p>
+        </div>
+      } @else {
+        <div class="table-scroll">
+          <table class="nx-table" aria-label="Stock par entrepôt">
+            <thead>
+              <tr>
+                <th scope="col">Entrepôt</th>
+                <th scope="col">Emplacement</th>
+                <th scope="col" class="num-col">Quantité</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (w of warehouseStock(); track trackWarehouse($index, w)) {
+                <tr>
+                  <td>{{ w.warehouseId }}</td>
+                  <td>{{ w.warehouseLocation || '—' }}</td>
+                  <td class="num-col">{{ w.quantity | number:'1.0-3' }} {{ p.unit }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (p.lotTracked || p.serialTracked || p.expiryTracked) {
+    <div class="nx-card">
+      <div class="nx-card__header"><h3 class="nx-card__title">Lots & numéros de série</h3></div>
+      <div class="nx-card__body" style="padding: 0;">
+        @if (lots().length === 0) {
+          <div class="nx-empty-state nx-empty-state--compact">
+            <div class="nx-empty-state__icon" aria-hidden="true">🏷️</div>
+            <p class="nx-empty-state__text">Aucun lot / numéro de série enregistré.</p>
+          </div>
+        } @else {
+          <div class="table-scroll">
+            <table class="nx-table" aria-label="Lots et numéros de série">
+              <thead>
+                <tr>
+                  <th scope="col">Lot</th>
+                  <th scope="col">N° série</th>
+                  <th scope="col" class="num-col">Quantité</th>
+                  <th scope="col">Emplacement</th>
+                  <th scope="col">Péremption</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (l of lots(); track trackLot($index, l)) {
+                  <tr [class.lot-row--expired]="isExpired(l.expiryDate)"
+                      [class.lot-row--near]="!isExpired(l.expiryDate) && isNearExpiry(l.expiryDate)">
+                    <td class="mono">{{ l.lotNumber || '—' }}</td>
+                    <td class="mono">{{ l.serialNumber || '—' }}</td>
+                    <td class="num-col">{{ l.quantity | number:'1.0-3' }} {{ p.unit }}</td>
+                    <td>{{ l.warehouseLocation || l.warehouseId || '—' }}</td>
+                    <td>
+                      @if (l.expiryDate) {
+                        {{ l.expiryDate | date:'dd/MM/yyyy' }}
+                        @if (isExpired(l.expiryDate)) {
+                          <span class="nx-badge nx-badge--error">Périmé</span>
+                        } @else if (isNearExpiry(l.expiryDate)) {
+                          <span class="nx-badge nx-badge--warning">J-{{ daysUntil(l.expiryDate) }}</span>
+                        }
+                      } @else { — }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  @if (modalOpen()) {
+    <div class="modal-overlay" (click)="closeMovement()" role="presentation">
+      <div class="modal-panel" (click)="$event.stopPropagation()"
+           role="dialog" aria-modal="true" aria-label="Mouvement de stock">
+        <div class="modal-panel__header">
+          <h3 class="modal-panel__title">Mouvement de stock</h3>
+          <button class="modal-panel__close" (click)="closeMovement()" aria-label="Fermer">×</button>
+        </div>
+        <div class="modal-panel__body">
+          <nx-movement-form
+            [product]="p"
+            [initialType]="modalType()"
+            (saved)="onMovementSaved($event)"
+            (cancelled)="closeMovement()" />
+        </div>
+      </div>
+    </div>
+  }
+  }
+}

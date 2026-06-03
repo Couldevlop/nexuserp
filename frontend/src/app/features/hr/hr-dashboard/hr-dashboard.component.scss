@@ -1,0 +1,59 @@
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.loading-block {
+  padding: var(--space-6);
+}
+
+.name-cell {
+  font-weight: 500;
+}
+
+.hire-link {
+  display: block;
+  color: var(--color-primary-600);
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.hire-job {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--color-neutral-500);
+}
+
+.date-cell {
+  white-space: nowrap;
+  font-size: 0.875rem;
+  color: var(--color-neutral-600);
+}
+
+.nx-empty-state--compact {
+  padding: var(--space-8) var(--space-4);
+}

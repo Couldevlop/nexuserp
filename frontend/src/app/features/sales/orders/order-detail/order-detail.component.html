@@ -1,0 +1,155 @@
+<nav class="nx-breadcrumb" aria-label="Fil d'Ariane">
+  <a routerLink="/sales/orders" class="nx-breadcrumb__link">Commandes</a>
+  <span class="nx-breadcrumb__sep" aria-hidden="true">/</span>
+  <span class="nx-breadcrumb__current" aria-current="page">
+    {{ order()?.orderNumber ?? '…' }}
+  </span>
+</nav>
+
+@if (isLoading()) {
+  <div class="nx-card" role="status" aria-live="polite" aria-label="Chargement en cours">
+    <div class="nx-card__body detail-skeleton">
+      <div class="nx-skeleton" style="height: 2rem; width: 30%;"></div>
+      <div class="nx-skeleton" style="height: 1rem; width: 50%; margin-top: 0.5rem;"></div>
+      <div class="nx-skeleton" style="height: 12rem; margin-top: 2rem;"></div>
+    </div>
+  </div>
+} @else if (order() !== null) {
+  @if (order(); as o) {
+  <!-- Header -->
+  <div class="order-detail-header">
+    <div class="order-detail-header__left">
+      <h1 class="order-detail-header__number">{{ o.orderNumber }}</h1>
+      <span class="nx-badge" [ngClass]="getStatusClass(o.status)"
+            style="font-size: 0.875rem; padding: 0.35rem 0.875rem;">
+        {{ getStatusLabel(o.status) }}
+      </span>
+    </div>
+    <div class="order-detail-header__actions">
+      @if (canConfirm()) {
+        <button class="nx-btn nx-btn--success" (click)="confirm()"
+                [disabled]="actionInProgress() !== null"
+                aria-label="Confirmer cette commande">
+          @if (actionInProgress() === 'confirm') { Confirmation… } @else { ✓ Confirmer }
+        </button>
+      }
+      @if (canCancel()) {
+        <button class="nx-btn nx-btn--danger" (click)="cancel()"
+                [disabled]="actionInProgress() !== null"
+                aria-label="Annuler cette commande">
+          @if (actionInProgress() === 'cancel') { Annulation… } @else { ✕ Annuler }
+        </button>
+      }
+      <a routerLink="/sales/orders" class="nx-btn nx-btn--ghost">← Retour</a>
+    </div>
+  </div>
+
+  <!-- Meta info -->
+  <div class="order-meta-grid">
+    <div class="nx-card order-meta-card">
+      <div class="nx-card__body">
+        <h2 class="order-meta-card__title">Client</h2>
+        <p class="order-meta-card__value">{{ o.customerName }}</p>
+        @if (o.customerRef) {
+          <p class="order-meta-card__sub">Réf. client : {{ o.customerRef }}</p>
+        }
+        @if (o.shippingAddress) {
+          <p class="order-meta-card__sub">{{ o.shippingAddress }}</p>
+        }
+      </div>
+    </div>
+    <div class="nx-card order-meta-card">
+      <div class="nx-card__body">
+        <h2 class="order-meta-card__title">Dates</h2>
+        <div class="date-row">
+          <span class="date-row__label">Date commande</span>
+          <span class="date-row__value">{{ o.orderDate | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="date-row">
+          <span class="date-row__label">Livraison souhaitée</span>
+          <span class="date-row__value">
+            {{ o.requestedDeliveryDate ? (o.requestedDeliveryDate | date:'dd/MM/yyyy') : '—' }}
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="nx-card order-meta-card order-meta-card--totals">
+      <div class="nx-card__body">
+        <h2 class="order-meta-card__title">Montant</h2>
+        <div class="totals-line totals-line--total">
+          <span>Total TTC</span>
+          <span>{{ formatAmount(o.totalAmount) }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lines table (dégradation gracieuse si le backend ne renvoie pas les lignes) -->
+  <div class="nx-card">
+    <div class="nx-card__header">
+      <h2 class="nx-card__title">Lignes de commande</h2>
+    </div>
+    <div class="nx-card__body" style="padding: 0;">
+      @if (o.lines && o.lines.length > 0) {
+        <table class="nx-table" aria-label="Lignes de commande">
+          <thead>
+            <tr>
+              <th scope="col">Produit / Service</th>
+              <th scope="col" style="text-align: right;">Qté</th>
+              <th scope="col" style="text-align: right;">P.U. HT</th>
+              <th scope="col" style="text-align: right;">Sous-total</th>
+              <th scope="col" style="text-align: right;">TVA</th>
+              <th scope="col" style="text-align: right;">Total TTC</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (line of o.lines; track line.id) {
+              <tr>
+                <td>
+                  {{ line.description }}
+                  @if (line.productCode) {
+                    <span class="line-code">{{ line.productCode }}</span>
+                  }
+                </td>
+                <td style="text-align: right; font-variant-numeric: tabular-nums;">
+                  {{ line.quantity | number:'1.0-3' }}
+                </td>
+                <td style="text-align: right; font-variant-numeric: tabular-nums;">
+                  {{ formatAmount(line.unitPrice) }}
+                </td>
+                <td style="text-align: right; font-variant-numeric: tabular-nums; font-weight: 500;">
+                  {{ formatAmount(line.subtotal) }}
+                </td>
+                <td style="text-align: right; font-variant-numeric: tabular-nums;">
+                  {{ formatAmount(line.taxAmount) }}
+                </td>
+                <td style="text-align: right; font-variant-numeric: tabular-nums; font-weight: 600;">
+                  {{ formatAmount(line.total) }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <div class="nx-empty-state nx-empty-state--compact">
+          <div class="nx-empty-state__icon" aria-hidden="true">📦</div>
+          <p class="nx-empty-state__text">
+            Le détail des lignes n'est pas disponible pour cette commande.
+          </p>
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (o.notes) {
+    <div class="nx-card">
+      <div class="nx-card__header">
+        <h2 class="nx-card__title">Notes</h2>
+      </div>
+      <div class="nx-card__body">
+        <p class="order-notes">{{ o.notes }}</p>
+      </div>
+    </div>
+  }
+  }
+}

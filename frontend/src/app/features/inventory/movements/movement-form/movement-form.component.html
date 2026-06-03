@@ -1,0 +1,108 @@
+<form class="movement-form" (ngSubmit)="submit()">
+  <div class="movement-form__product" aria-live="polite">
+    <span class="movement-form__code">{{ product.productCode }}</span>
+    <span class="movement-form__name">{{ product.name }}</span>
+    <span class="movement-form__stock">
+      Stock actuel : <strong>{{ product.quantityOnHand | number:'1.0-3' }} {{ product.unit }}</strong>
+    </span>
+  </div>
+
+  <div class="nx-form-group">
+    <label class="nx-label" for="mvtType">Type de mouvement <span class="required" aria-hidden="true">*</span></label>
+    <select id="mvtType" class="nx-input"
+            [value]="form().type"
+            (change)="patch('type', $any($event.target).value)"
+            aria-label="Type de mouvement">
+      @for (t of movementTypes; track t.value) {
+        <option [value]="t.value" [disabled]="!t.supported">
+          {{ t.label }}{{ t.supported ? '' : ' (bientôt)' }}
+        </option>
+      }
+    </select>
+  </div>
+
+  @if (!typeSupported()) {
+    <p class="movement-form__warn" role="alert">
+      Le transfert inter-entrepôts n'est pas encore pris en charge par le serveur.
+    </p>
+  }
+
+  <div class="movement-form__grid">
+    <div class="nx-form-group">
+      <label class="nx-label" for="mvtQty">
+        {{ isAdjustment() ? 'Nouvelle quantité' : 'Quantité' }} <span class="required" aria-hidden="true">*</span>
+      </label>
+      <input id="mvtQty" type="number" class="nx-input"
+             [value]="form().quantity"
+             (input)="patch('quantity', +$any($event.target).value)"
+             min="0" step="0.001"
+             aria-label="Quantité du mouvement" required />
+    </div>
+
+    @if (isIn()) {
+      <div class="nx-form-group">
+        <label class="nx-label" for="mvtCost">Coût unitaire <span class="required" aria-hidden="true">*</span></label>
+        <input id="mvtCost" type="number" class="nx-input"
+               [value]="form().unitCost"
+               (input)="patch('unitCost', +$any($event.target).value)"
+               min="0" step="0.01"
+               aria-label="Coût unitaire" required />
+      </div>
+      <div class="nx-form-group">
+        <label class="nx-label" for="mvtCur">Devise</label>
+        <select id="mvtCur" class="nx-input"
+                [value]="form().currency"
+                (change)="patch('currency', $any($event.target).value)"
+                aria-label="Devise">
+          @for (c of currencies; track c) {
+            <option [value]="c">{{ c }}</option>
+          }
+        </select>
+      </div>
+    }
+  </div>
+
+  @if (isAdjustment()) {
+    <div class="nx-form-group">
+      <label class="nx-label" for="mvtReason">Motif d'ajustement <span class="required" aria-hidden="true">*</span></label>
+      <input id="mvtReason" type="text" class="nx-input"
+             [value]="form().reason"
+             (input)="patch('reason', $any($event.target).value)"
+             placeholder="Inventaire, casse, correction…"
+             aria-label="Motif de l'ajustement" required />
+    </div>
+  }
+
+  @if (!isAdjustment()) {
+    <div class="nx-form-group">
+      <label class="nx-label" for="mvtRef">Référence / Bon</label>
+      <input id="mvtRef" type="text" class="nx-input"
+             [value]="form().reference"
+             (input)="patch('reference', $any($event.target).value)"
+             placeholder="N° de commande, bon de livraison…"
+             aria-label="Référence du mouvement" />
+    </div>
+  }
+
+  @if (product.lotTracked || product.serialTracked) {
+    <div class="nx-form-group">
+      <label class="nx-label" for="mvtLot">
+        {{ product.serialTracked ? 'N° de série' : 'N° de lot' }}
+      </label>
+      <input id="mvtLot" type="text" class="nx-input"
+             [value]="form().lotOrSerial"
+             (input)="patch('lotOrSerial', $any($event.target).value)"
+             [attr.placeholder]="product.serialTracked ? 'SN-…' : 'LOT-…'"
+             aria-label="Lot ou numéro de série" />
+    </div>
+  }
+
+  <div class="movement-form__actions">
+    <button type="button" class="nx-btn nx-btn--ghost" (click)="cancel()">Annuler</button>
+    <button type="submit" class="nx-btn nx-btn--primary"
+            [disabled]="isSubmitting() || !typeSupported()"
+            aria-label="Enregistrer le mouvement">
+      @if (isSubmitting()) { Enregistrement… } @else { Enregistrer }
+    </button>
+  </div>
+</form>

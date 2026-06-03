@@ -1,0 +1,193 @@
+{
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "export": "Exporter",
+    "import": "Importer",
+    "loading": "Chargement…",
+    "noData": "Aucune donnée",
+    "error": "Une erreur est survenue",
+    "success": "Opération réussie",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "close": "Fermer",
+    "all": "Tous",
+    "yes": "Oui",
+    "no": "Non",
+    "from": "Du",
+    "to": "Au",
+    "actions": "Actions",
+    "status": "Statut",
+    "date": "Date",
+    "amount": "Montant",
+    "total": "Total",
+    "currency": "Devise",
+    "name": "Nom",
+    "email": "Email",
+    "phone": "Téléphone",
+    "address": "Adresse",
+    "city": "Ville",
+    "country": "Pays",
+    "required": "Obligatoire",
+    "optional": "Optionnel",
+    "page": "Page",
+    "of": "sur",
+    "rowsPerPage": "Lignes par page",
+    "seeAll": "Voir tout"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "finance": "Finance",
+    "procurement": "Achats",
+    "inventory": "Stocks",
+    "sales": "Ventes",
+    "hr": "Ressources Humaines",
+    "production": "Production",
+    "reporting": "Rapports",
+    "admin": "Administration",
+    "settings": "Paramètres",
+    "logout": "Déconnexion",
+    "aiAssistant": "Assistant IA"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "welcome": "Bienvenue",
+    "kpi": {
+      "revenue": "Chiffre d'affaires (mois)",
+      "pendingInvoices": "Factures en attente",
+      "totalStock": "Stock total",
+      "activeEmployees": "Employés actifs"
+    },
+    "sections": {
+      "recentInvoices": "Factures récentes",
+      "quickActions": "Actions rapides",
+      "stockAlerts": "Alertes stock"
+    }
+  },
+  "finance": {
+    "invoice": {
+      "title": "Facture",
+      "titlePlural": "Factures",
+      "number": "N° Facture",
+      "create": "Nouvelle facture",
+      "customer": "Client",
+      "dueDate": "Échéance",
+      "subtotal": "Sous-total HT",
+      "tax": "TVA",
+      "total": "Total TTC",
+      "notes": "Notes",
+      "lines": "Lignes",
+      "lineDescription": "Description",
+      "lineQty": "Qté",
+      "lineUnitPrice": "P.U. HT",
+      "lineDiscount": "Remise %",
+      "lineTaxRate": "TVA",
+      "lineTotal": "Total TTC",
+      "addLine": "+ Ajouter une ligne",
+      "status": {
+        "DRAFT": "Brouillon",
+        "SUBMITTED": "En attente",
+        "APPROVED": "Approuvée",
+        "PAID": "Payée",
+        "OVERDUE": "En retard",
+        "CANCELLED": "Annulée"
+      },
+      "actions": {
+        "approve": "Approuver",
+        "approving": "Approbation…",
+        "submit": "Soumettre",
+        "markPaid": "Marquer comme payée",
+        "cancel": "Annuler la facture"
+      },
+      "messages": {
+        "created": "Facture créée avec succès",
+        "approved": "Facture approuvée avec succès",
+        "notFound": "Facture introuvable",
+        "createError": "Erreur lors de la création de la facture",
+        "approveError": "Échec de l'approbation"
+      }
+    },
+    "journal": {
+      "title": "Journal comptable",
+      "entry": "Écriture comptable"
+    }
+  },
+  "procurement": {
+    "title": "Achats & Approvisionnements",
+    "purchaseOrder": "Bon de commande",
+    "supplier": "Fournisseur"
+  },
+  "inventory": {
+    "title": "Gestion des Stocks",
+    "product": "Produit",
+    "stock": "Stock",
+    "warehouse": "Entrepôt",
+    "lowStock": "Stock faible"
+  },
+  "sales": {
+    "title": "Ventes & CRM",
+    "order": "Commande",
+    "customer": "Client",
+    "quote": "Devis"
+  },
+  "hr": {
+    "title": "Ressources Humaines",
+    "employee": "Employé",
+    "payslip": "Bulletin de paie",
+    "leave": "Congé"
+  },
+  "production": {
+    "title": "Production",
+    "workOrder": "Ordre de fabrication",
+    "bom": "Nomenclature"
+  },
+  "reporting": {
+    "title": "Rapports & Analytics",
+    "balanceSheet": "Bilan",
+    "pnl": "Compte de résultat",
+    "fec": "Export FEC"
+  },
+  "admin": {
+    "title": "Administration",
+    "users": "Utilisateurs",
+    "roles": "Rôles",
+    "tenant": "Tenant"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "language": "Langue",
+    "currency": "Devise",
+    "timezone": "Fuseau horaire",
+    "notifications": "Notifications"
+  },
+  "auth": {
+    "login": "Connexion",
+    "logout": "Déconnexion",
+    "redirecting": "Redirection vers l'authentification…",
+    "accessDenied": "Accès refusé — permissions insuffisantes",
+    "sessionExpired": "Session expirée, reconnexion…"
+  },
+  "ai": {
+    "assistant": "Assistant IA",
+    "placeholder": "Posez une question sur vos données…",
+    "send": "Envoyer",
+    "thinking": "Réflexion en cours…",
+    "greeting": "Bonjour ! Je suis votre assistant NexusERP. Comment puis-je vous aider ?",
+    "disabled": "L'assistant IA n'est pas disponible actuellement.",
+    "error": "Erreur lors de la communication avec l'assistant IA"
+  },
+  "errors": {
+    "unauthorized": "Session expirée. Reconnexion en cours…",
+    "forbidden": "Accès refusé — permissions insuffisantes pour ce module",
+    "rateLimited": "Trop de requêtes — veuillez patienter",
+    "serverError": "Erreur serveur — veuillez réessayer dans quelques instants",
+    "networkError": "Erreur de connexion réseau"
+  }
+}

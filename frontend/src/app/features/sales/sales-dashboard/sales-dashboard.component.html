@@ -1,0 +1,97 @@
+<div class="nx-page-header">
+  <div class="nx-page-header__content">
+    <h1 class="nx-page-header__title">Tableau de bord Ventes</h1>
+    <p class="nx-page-header__subtitle">Vue d'ensemble de l'activité commerciale</p>
+  </div>
+  <div class="nx-page-header__actions">
+    <a routerLink="/sales/orders" class="nx-btn nx-btn--ghost">Voir les commandes</a>
+    <a routerLink="/sales/orders/new" class="nx-btn nx-btn--primary">+ Nouvelle commande</a>
+  </div>
+</div>
+
+@if (isLoading()) {
+  <div class="kpi-grid" role="status" aria-live="polite" aria-label="Chargement des indicateurs">
+    @for (i of [1,2,3]; track i) {
+      <div class="nx-card kpi-card">
+        <div class="nx-card__body">
+          <div class="nx-skeleton" style="height: 0.875rem; width: 50%;"></div>
+          <div class="nx-skeleton" style="height: 2rem; width: 70%; margin-top: 0.75rem;"></div>
+        </div>
+      </div>
+    }
+  </div>
+  <div class="nx-card" style="margin-top: var(--space-4);">
+    <div class="nx-card__body">
+      <div class="nx-skeleton" style="height: 1rem; width: 30%;"></div>
+      <div class="nx-skeleton" style="height: 8rem; margin-top: 1rem;"></div>
+    </div>
+  </div>
+} @else {
+  <!-- KPI cards -->
+  <div class="kpi-grid">
+    <div class="nx-card kpi-card">
+      <div class="nx-card__body">
+        <span class="kpi-card__label">CA du mois (livré / facturé)</span>
+        <span class="kpi-card__value">
+          @if (hasData()) { {{ formatAmount(monthlyRevenue()) }} } @else { — }
+        </span>
+      </div>
+    </div>
+    <div class="nx-card kpi-card">
+      <div class="nx-card__body">
+        <span class="kpi-card__label">Commandes en cours</span>
+        <span class="kpi-card__value">
+          @if (hasData()) { {{ openOrdersCount() }} } @else { — }
+        </span>
+      </div>
+    </div>
+    <div class="nx-card kpi-card">
+      <div class="nx-card__body">
+        <span class="kpi-card__label">Commandes (total récent)</span>
+        <span class="kpi-card__value">
+          @if (hasData()) { {{ totalOrders() }} } @else { — }
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top clients -->
+  <div class="nx-card" style="margin-top: var(--space-4);">
+    <div class="nx-card__header">
+      <h2 class="nx-card__title">Top clients</h2>
+    </div>
+    <div class="nx-card__body" style="padding: 0;">
+      @if (topCustomers().length > 0) {
+        <table class="nx-table" aria-label="Top clients par chiffre d'affaires">
+          <thead>
+            <tr>
+              <th scope="col">Client</th>
+              <th scope="col" style="text-align: right;">Commandes</th>
+              <th scope="col" style="text-align: right;">CA cumulé TTC</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of topCustomers(); track c.name) {
+              <tr>
+                <td class="name-cell">{{ c.name }}</td>
+                <td style="text-align: right; font-variant-numeric: tabular-nums;">{{ c.orders }}</td>
+                <td style="text-align: right; font-variant-numeric: tabular-nums; font-weight: 600;">
+                  {{ formatAmount(c.total) }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <div class="nx-empty-state nx-empty-state--compact">
+          <div class="nx-empty-state__icon" aria-hidden="true">📊</div>
+          <h3 class="nx-empty-state__title">Aucune donnée</h3>
+          <p class="nx-empty-state__text">
+            Les indicateurs s'afficheront dès que des commandes seront enregistrées.
+          </p>
+          <a routerLink="/sales/orders/new" class="nx-btn nx-btn--primary">+ Nouvelle commande</a>
+        </div>
+      }
+    </div>
+  </div>
+}

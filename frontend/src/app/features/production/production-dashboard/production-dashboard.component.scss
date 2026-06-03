@@ -1,0 +1,95 @@
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.loading-state {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.skeleton-row {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-neutral-100);
+}
+
+.wo-number-link {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-primary-600);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.name-cell {
+  font-weight: 500;
+}
+
+.num-cell {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.nx-empty-state--compact {
+  padding: var(--space-8) var(--space-4);
+}
+
+// Responsive — la table devient des cartes empilées sur mobile
+@media (max-width: 640px) {
+  .nx-table thead {
+    display: none;
+  }
+
+  .nx-table,
+  .nx-table tbody,
+  .nx-table tr,
+  .nx-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .nx-table tr {
+    border-bottom: 1px solid var(--color-neutral-200);
+    padding: var(--space-2) 0;
+  }
+
+  .nx-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-3);
+    text-align: right;
+    border: none;
+    padding: var(--space-1) var(--space-4);
+
+    &::before {
+      content: attr(data-label);
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--color-neutral-500);
+      text-align: left;
+    }
+  }
+}

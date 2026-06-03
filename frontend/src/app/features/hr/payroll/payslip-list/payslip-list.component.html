@@ -1,0 +1,104 @@
+<div class="nx-page-header">
+  <div class="nx-page-header__content">
+    <h1 class="nx-page-header__title">Bulletins de paie</h1>
+    <p class="nx-page-header__subtitle">Simulation de paie par salarié (régime France / UEMOA)</p>
+  </div>
+</div>
+
+@if (!canViewPayroll()) {
+  <div class="nx-card">
+    <div class="nx-card__body">
+      <div class="nx-empty-state">
+        <div class="nx-empty-state__icon" aria-hidden="true">🔒</div>
+        <h3 class="nx-empty-state__title">Accès restreint</h3>
+        <p class="nx-empty-state__text">
+          La consultation des bulletins de paie est réservée aux responsables RH.
+        </p>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="nx-card">
+    <div class="nx-card__body" style="padding: 0;">
+      @if (isLoading()) {
+        <div class="loading-state" role="status" aria-live="polite" aria-label="Chargement des bulletins">
+          @for (i of [1,2,3,4]; track i) {
+            <div class="skeleton-row">
+              <div class="nx-skeleton" style="height: 1rem; width: 24%;"></div>
+              <div class="nx-skeleton" style="height: 1rem; width: 14%;"></div>
+              <div class="nx-skeleton" style="height: 1rem; width: 14%;"></div>
+              <div class="nx-skeleton" style="height: 1.75rem; width: 12%; border-radius: 999px;"></div>
+            </div>
+          }
+        </div>
+      } @else if (notAvailable()) {
+        <div class="nx-empty-state">
+          <div class="nx-empty-state__icon" aria-hidden="true">📄</div>
+          <h3 class="nx-empty-state__title">Données indisponibles</h3>
+          <p class="nx-empty-state__text">
+            Impossible de charger l'effectif pour la simulation de paie pour le moment.
+          </p>
+        </div>
+      } @else if (rows().length === 0) {
+        <div class="nx-empty-state">
+          <div class="nx-empty-state__icon" aria-hidden="true">📄</div>
+          <h3 class="nx-empty-state__title">Aucun salarié à traiter</h3>
+          <p class="nx-empty-state__text">
+            Ajoutez des salariés actifs pour simuler leurs bulletins de paie.
+          </p>
+          <a routerLink="/hr/employees/new" class="nx-btn nx-btn--primary">+ Nouvel employé</a>
+        </div>
+      } @else {
+        <table class="nx-table" aria-label="Bulletins de paie par salarié">
+          <thead>
+            <tr>
+              <th scope="col">Salarié</th>
+              <th scope="col">Contrat</th>
+              <th scope="col" style="text-align: right;">Brut</th>
+              <th scope="col" style="text-align: right;">Net (simulé)</th>
+              <th scope="col" style="text-align: right;">Coût employeur</th>
+              <th scope="col"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows(); track row.employee.id) {
+              <tr>
+                <td data-label="Salarié">
+                  <a [routerLink]="['/hr/employees', row.employee.id]" class="payslip-employee">
+                    {{ row.employee.fullName }}
+                  </a>
+                  <span class="payslip-number">{{ row.employee.employeeNumber }}</span>
+                </td>
+                <td data-label="Contrat">
+                  {{ contractLabel[row.employee.contractType] || row.employee.contractType }}
+                </td>
+                <td class="amount-cell" data-label="Brut">
+                  {{ formatSalary(row.employee.grossSalaryAmount, row.employee.grossSalaryCurrency) }}
+                </td>
+                <td class="amount-cell" data-label="Net (simulé)">
+                  @if (row.payslip) {
+                    {{ formatMoneyDto(row.payslip.netSalary) }}
+                  } @else { — }
+                </td>
+                <td class="amount-cell" data-label="Coût employeur">
+                  @if (row.payslip) {
+                    {{ formatMoneyDto(row.payslip.totalEmployerCost) }}
+                  } @else { — }
+                </td>
+                <td class="actions-cell">
+                  <button class="nx-btn nx-btn--ghost action-btn" (click)="compute(row)"
+                          [disabled]="row.computing"
+                          [attr.aria-label]="'Simuler le bulletin de ' + row.employee.fullName">
+                    @if (row.computing) { Calcul… }
+                    @else if (row.payslip) { ↻ Recalculer }
+                    @else { 💶 Simuler }
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  </div>
+}

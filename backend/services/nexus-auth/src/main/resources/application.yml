@@ -1,0 +1,59 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: nexus-auth
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_URL:http://localhost:8180}/realms/${KEYCLOAK_REALM:nexuserp}
+          jwk-set-uri: ${KEYCLOAK_URL:http://localhost:8180}/realms/${KEYCLOAK_REALM:nexuserp}/protocol/openid-connect/certs
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:nexus}
+    username: ${DB_USER:nexus}
+    password: ${DB_PASSWORD:nexus}
+    hikari:
+      maximum-pool-size: 10
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+keycloak:
+  auth-server-url: ${KEYCLOAK_URL:http://localhost:8180}
+  realm: ${KEYCLOAK_REALM:nexuserp}
+  resource: ${KEYCLOAK_CLIENT_ID:nexuserp-auth}
+  credentials:
+    secret: ${KEYCLOAK_CLIENT_SECRET:change-me}
+  admin:
+    client-id: admin-cli
+
+nexuserp:
+  2fa:
+    totp:
+      issuer: NexusERP
+      digits: 6
+      period: 30
+    recovery-codes:
+      count: 10
+      length: 8
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  tracing:
+    sampling:
+      probability: 1.0
+
+logging:
+  pattern:
+    console: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%level","service":"nexus-auth","traceId":"%X{traceId}","message":"%message"}%n'

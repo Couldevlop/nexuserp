@@ -1,0 +1,25 @@
+@if (view().variant !== 'synced') {
+  <div
+    class="nx-offline-indicator"
+    [class.nx-offline-indicator--offline]="view().variant === 'offline'"
+    [class.nx-offline-indicator--syncing]="view().variant === 'syncing'"
+    [class.nx-offline-indicator--conflict]="view().variant === 'conflict'"
+    role="status"
+    aria-live="polite"
+    (click)="retry()"
+    (keydown.enter)="retry()"
+    tabindex="0"
+  >
+    <span
+      class="nx-offline-indicator__dot"
+      [class.nx-offline-indicator__dot--busy]="view().busy"
+      aria-hidden="true"
+    ></span>
+    <span class="nx-offline-indicator__label">{{ view().label }}</span>
+  </div>
+} @else {
+  <div class="nx-offline-indicator nx-offline-indicator--synced" role="status" aria-live="polite">
+    <span class="nx-offline-indicator__dot" aria-hidden="true"></span>
+    <span class="nx-offline-indicator__label">{{ view().label }}</span>
+  </div>
+}

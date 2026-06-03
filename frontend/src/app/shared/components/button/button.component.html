@@ -1,0 +1,13 @@
+<button
+  class="nx-btn"
+  [class]="'nx-btn nx-btn--' + variant + ' nx-btn--' + size"
+  [type]="type"
+  [disabled]="disabled || loading"
+  (click)="onClick($event)"
+  [attr.aria-disabled]="disabled || loading"
+>
+  @if (loading) {
+    <span class="nx-btn__spinner" aria-hidden="true"></span>
+  }
+  <ng-content />
+</button>

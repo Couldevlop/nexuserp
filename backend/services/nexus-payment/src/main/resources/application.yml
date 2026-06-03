@@ -1,0 +1,139 @@
+server:
+  port: 8093
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: nexus-payment
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:nexuserp}?currentSchema=nexus_payment
+    username: ${DB_USER:nexus}
+    password: ${DB_PASSWORD:nexus_dev_secret}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: NexusPaymentPool
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: nexus_payment
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+        jdbc:
+          batch_size: 500
+          order_inserts: true
+          order_updates: true
+    show-sql: false
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    schemas: nexus_payment
+    baseline-on-migrate: true
+    validate-on-migrate: true
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      retries: 3
+      properties:
+        enable.idempotence: true
+    consumer:
+      group-id: nexus-payment
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:nexus_redis_secret}
+      timeout: 2000ms
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_URL:http://localhost:8180}/realms/nexuserp
+
+  cache:
+    type: redis
+    redis:
+      time-to-live: 300000  # 5 minutes
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Configuration des providers Mobile Money.
+# OWASP A02 : les webhook-secret proviennent des variables d'environnement / Vault.
+# Les valeurs par défaut ci-dessous sont des secrets de DÉVELOPPEMENT uniquement —
+# elles DOIVENT être surchargées en staging/production.
+# ─────────────────────────────────────────────────────────────────────────────
+nexus:
+  payment:
+    callback-base-url: ${PAYMENT_CALLBACK_BASE_URL:http://localhost:8093/api/v1/payments/webhooks}
+    providers:
+      orange_money:
+        enabled: true
+        webhook-secret: ${ORANGE_WEBHOOK_SECRET:dev-orange-webhook-secret}
+        api-base-url: ${ORANGE_API_BASE_URL:https://api.sandbox.orange.com}
+        api-key: ${ORANGE_API_KEY:dev-orange-api-key}
+      wave:
+        enabled: true
+        webhook-secret: ${WAVE_WEBHOOK_SECRET:dev-wave-webhook-secret}
+        api-base-url: ${WAVE_API_BASE_URL:https://api.wave.com}
+        api-key: ${WAVE_API_KEY:dev-wave-api-key}
+      mtn_momo:
+        enabled: true
+        webhook-secret: ${MTN_WEBHOOK_SECRET:dev-mtn-webhook-secret}
+        api-base-url: ${MTN_API_BASE_URL:https://sandbox.momodeveloper.mtn.com}
+        api-key: ${MTN_API_KEY:dev-mtn-api-key}
+      moov_money:
+        enabled: true
+        webhook-secret: ${MOOV_WEBHOOK_SECRET:dev-moov-webhook-secret}
+        api-base-url: ${MOOV_API_BASE_URL:https://api.moov-africa.ci}
+        api-key: ${MOOV_API_KEY:dev-moov-api-key}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      service: nexus-payment
+  endpoint:
+    health:
+      show-details: when_authorized
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+
+logging:
+  level:
+    com.nexuserp.payment: INFO
+    org.hibernate.SQL: WARN
+  pattern:
+    console: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%level","service":"nexus-payment","tenantId":"%X{tenantId}","traceId":"%X{traceId}","message":"%message"}%n'

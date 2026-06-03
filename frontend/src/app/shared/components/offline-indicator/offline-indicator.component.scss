@@ -1,0 +1,79 @@
+.nx-offline-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-fast);
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary-500);
+    outline-offset: 2px;
+  }
+
+  &__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: currentColor;
+    flex-shrink: 0;
+
+    &--busy {
+      animation: nx-offline-pulse 1s ease-in-out infinite;
+    }
+  }
+
+  &__label {
+    white-space: nowrap;
+  }
+
+  // Hors ligne — orange (avertissement, A04 visible)
+  &--offline {
+    background: var(--color-warning-bg);
+    color: var(--color-warning);
+  }
+
+  // Synchronisation / en attente — bleu info
+  &--syncing {
+    background: var(--color-info-bg, #eff6ff);
+    color: var(--color-info, #3b82f6);
+  }
+
+  // Conflit — rouge (action requise)
+  &--conflict {
+    background: var(--color-error-bg, #fef2f2);
+    color: var(--color-error, #ef4444);
+  }
+
+  // À jour — vert (succès), non cliquable
+  &--synced {
+    background: var(--color-success-bg);
+    color: var(--color-success);
+    cursor: default;
+    box-shadow: none;
+  }
+}
+
+@keyframes nx-offline-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.7);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nx-offline-indicator__dot--busy {
+    animation: none;
+  }
+}

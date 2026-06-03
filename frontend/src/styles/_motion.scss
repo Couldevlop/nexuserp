@@ -1,0 +1,154 @@
+// NexusERP — Motion & Polish System
+// Utilitaires d'animation réutilisables, basés sur les tokens de transition.
+// Règle 60fps : on n'anime QUE transform / opacity (jamais le layout).
+// Toutes les animations respectent prefers-reduced-motion.
+//
+// Wiring : ajouter dans main.scss après `@import 'utilities';` :
+//   @import 'motion';
+
+// ─── Keyframes (transform/opacity uniquement) ───────────────────────────────
+
+@keyframes nx-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes nx-slide-up {
+  from { opacity: 0; transform: translate3d(0, 12px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes nx-slide-down {
+  from { opacity: 0; transform: translate3d(0, -12px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes nx-scale-in {
+  from { opacity: 0; transform: scale3d(0.96, 0.96, 1); }
+  to   { opacity: 1; transform: scale3d(1, 1, 1); }
+}
+
+// Shimmer via translation d'un pseudo-élément (transform only, pas de background-position).
+@keyframes nx-shimmer-slide {
+  from { transform: translate3d(-100%, 0, 0); }
+  to   { transform: translate3d(100%, 0, 0); }
+}
+
+// ─── Transition d'entrée de page / route ────────────────────────────────────
+
+.nx-route-enter {
+  animation: nx-slide-up var(--transition-base) both;
+}
+
+// ─── Utilitaires d'animation ────────────────────────────────────────────────
+
+.nx-fade-in {
+  animation: nx-fade-in var(--transition-base) both;
+}
+
+.nx-slide-up {
+  animation: nx-slide-up var(--transition-base) both;
+}
+
+.nx-slide-down {
+  animation: nx-slide-down var(--transition-base) both;
+}
+
+.nx-scale-in {
+  animation: nx-scale-in var(--transition-fast) both;
+}
+
+// Apparition échelonnée d'une liste d'éléments.
+// Usage : <li class="nx-stagger" style="--nx-stagger-index: 0">…</li>
+// Le delay est dérivé de la custom property pour rester déclaratif.
+.nx-stagger {
+  --nx-stagger-index: 0;
+  --nx-stagger-step: 45ms;
+  animation: nx-slide-up var(--transition-base) both;
+  animation-delay: calc(var(--nx-stagger-index) * var(--nx-stagger-step));
+}
+
+// Skeleton shimmer réutilisable — overlay clippé, animé en transform.
+.nx-shimmer {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-neutral-100);
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translate3d(-100%, 0, 0);
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.6) 50%,
+      transparent 100%
+    );
+    animation: nx-shimmer-slide 1.5s infinite;
+    will-change: transform;
+  }
+}
+
+// Micro-interaction "press" sur boutons / éléments cliquables.
+.nx-press {
+  transition: transform var(--transition-fast);
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+// Élévation au survol (lift via shadow + translation).
+.nx-elevate {
+  transition:
+    transform var(--transition-base),
+    box-shadow var(--transition-base);
+  will-change: transform;
+
+  &:hover {
+    transform: translate3d(0, -2px, 0);
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+// Anneau de focus accessible et fluide, basé sur --shadow-glow.
+.nx-focus-ring {
+  outline: none;
+  transition: box-shadow var(--transition-fast);
+
+  &:focus-visible {
+    box-shadow: var(--shadow-glow);
+  }
+}
+
+// ─── Respect de prefers-reduced-motion ──────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+  .nx-route-enter,
+  .nx-fade-in,
+  .nx-slide-up,
+  .nx-slide-down,
+  .nx-scale-in,
+  .nx-stagger {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .nx-shimmer::after {
+    animation: none !important;
+  }
+
+  .nx-press:active {
+    transform: none !important;
+  }
+
+  .nx-elevate {
+    transition: box-shadow var(--transition-fast);
+
+    &:hover {
+      transform: none !important;
+    }
+  }
+}

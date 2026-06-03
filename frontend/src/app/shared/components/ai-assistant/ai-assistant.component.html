@@ -1,0 +1,78 @@
+<!-- FAB Button -->
+@if (!isOpen()) {
+  <button class="nx-ai-fab" (click)="togglePanel()" aria-label="Ouvrir l'assistant IA">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+    <span class="nx-ai-fab__badge">IA</span>
+  </button>
+}
+
+<!-- Panel -->
+@if (isOpen()) {
+  <div class="nx-ai-panel" [class.minimized]="isMinimized()">
+
+    <!-- Header -->
+    <div class="nx-ai-panel__header" (click)="toggleMinimize()">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="nx-ai-panel__header-status"></div>
+        <span class="nx-ai-panel__header-title">Assistant NexusERP IA</span>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button (click)="$event.stopPropagation(); toggleMinimize()"
+                style="background:none;border:none;color:rgba(255,255,255,0.7);cursor:pointer;font-size:16px;"
+                [attr.aria-label]="isMinimized() ? 'Agrandir' : 'Réduire'">
+          {{ isMinimized() ? '▲' : '▼' }}
+        </button>
+        <button (click)="$event.stopPropagation(); togglePanel()"
+                style="background:none;border:none;color:rgba(255,255,255,0.7);cursor:pointer;font-size:16px;"
+                aria-label="Fermer l'assistant">
+          ×
+        </button>
+      </div>
+    </div>
+
+    @if (!isMinimized()) {
+      <!-- Messages -->
+      <div class="nx-ai-panel__messages" role="log" aria-live="polite">
+        @for (msg of messages(); track msg.timestamp) {
+          <div class="nx-ai-message" [class]="'nx-ai-message--' + msg.role">
+            <div class="nx-ai-message__bubble">{{ msg.content }}</div>
+            <time class="nx-ai-message__time">
+              {{ msg.timestamp | date: 'HH:mm' }}
+            </time>
+          </div>
+        }
+
+        @if (isLoading()) {
+          <div class="nx-ai-message nx-ai-message--assistant">
+            <div class="nx-ai-message__bubble nx-ai-message__bubble--loading">
+              <span></span><span></span><span></span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Input -->
+      <div class="nx-ai-panel__input">
+        <textarea
+          class="nx-input"
+          [(ngModel)]="userInput"
+          (keydown)="onKeyDown($event)"
+          placeholder="Posez votre question..."
+          rows="2"
+          style="resize:none;flex:1;"
+          aria-label="Message à l'assistant"
+          [disabled]="isLoading()">
+        </textarea>
+        <button
+          class="nx-btn nx-btn--primary nx-btn--sm"
+          (click)="sendMessage()"
+          [disabled]="!userInput.trim() || isLoading()"
+          aria-label="Envoyer">
+          →
+        </button>
+      </div>
+    }
+  </div>
+}

@@ -1,0 +1,186 @@
+<nav class="nx-breadcrumb" aria-label="Fil d'Ariane">
+  <a routerLink="/hr/employees" class="nx-breadcrumb__link">Salariés</a>
+  <span class="nx-breadcrumb__sep" aria-hidden="true">/</span>
+  <span class="nx-breadcrumb__current" aria-current="page">Nouvel employé</span>
+</nav>
+
+<div class="nx-page-header">
+  <div class="nx-page-header__content">
+    <h1 class="nx-page-header__title">Nouvel employé</h1>
+  </div>
+  <div class="nx-page-header__actions">
+    <a routerLink="/hr/employees" class="nx-btn nx-btn--ghost">Annuler</a>
+    <button class="nx-btn nx-btn--primary" (click)="submit()"
+            [disabled]="isSubmitting() || !isValid()"
+            aria-label="Enregistrer le salarié">
+      @if (isSubmitting()) { Enregistrement… } @else { Enregistrer }
+    </button>
+  </div>
+</div>
+
+<div class="create-grid">
+
+  <!-- Identité -->
+  <div class="nx-card">
+    <div class="nx-card__header">
+      <h2 class="nx-card__title">Identité</h2>
+    </div>
+    <div class="nx-card__body">
+      <div class="nx-form-group">
+        <label class="nx-label" for="employeeNumber">
+          Matricule <span class="required" aria-hidden="true">*</span>
+        </label>
+        <input id="employeeNumber" type="text" class="nx-input"
+               [value]="form().employeeNumber"
+               (input)="updateField('employeeNumber', $any($event.target).value)"
+               placeholder="EMP-0001"
+               required aria-required="true" />
+      </div>
+      <div class="settings-grid">
+        <div class="nx-form-group">
+          <label class="nx-label" for="firstName">
+            Prénom <span class="required" aria-hidden="true">*</span>
+          </label>
+          <input id="firstName" type="text" class="nx-input"
+                 [value]="form().firstName"
+                 (input)="updateField('firstName', $any($event.target).value)"
+                 placeholder="Prénom"
+                 required aria-required="true" />
+        </div>
+        <div class="nx-form-group">
+          <label class="nx-label" for="lastName">
+            Nom <span class="required" aria-hidden="true">*</span>
+          </label>
+          <input id="lastName" type="text" class="nx-input"
+                 [value]="form().lastName"
+                 (input)="updateField('lastName', $any($event.target).value)"
+                 placeholder="Nom"
+                 required aria-required="true" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Coordonnées -->
+  <div class="nx-card">
+    <div class="nx-card__header">
+      <h2 class="nx-card__title">Coordonnées</h2>
+    </div>
+    <div class="nx-card__body">
+      <div class="nx-form-group">
+        <label class="nx-label" for="email">E-mail</label>
+        <input id="email" type="email" class="nx-input"
+               [class.nx-input--error]="!emailValid()"
+               [value]="form().email"
+               (input)="updateField('email', $any($event.target).value)"
+               placeholder="prenom.nom@entreprise.ci"
+               [attr.aria-invalid]="!emailValid()" />
+        @if (!emailValid()) {
+          <span class="field-error" role="alert">Format d'e-mail invalide.</span>
+        }
+      </div>
+      <div class="nx-form-group">
+        <label class="nx-label" for="phone">Téléphone</label>
+        <input id="phone" type="tel" class="nx-input"
+               [value]="form().phone"
+               (input)="updateField('phone', $any($event.target).value)"
+               placeholder="+225 0102030405" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Poste -->
+  <div class="nx-card">
+    <div class="nx-card__header">
+      <h2 class="nx-card__title">Poste</h2>
+    </div>
+    <div class="nx-card__body">
+      <div class="nx-form-group">
+        <label class="nx-label" for="jobTitle">Intitulé du poste</label>
+        <input id="jobTitle" type="text" class="nx-input"
+               [value]="form().jobTitle"
+               (input)="updateField('jobTitle', $any($event.target).value)"
+               placeholder="ex : Comptable" />
+      </div>
+      <div class="nx-form-group">
+        <label class="nx-label" for="department">Département</label>
+        <input id="department" type="text" class="nx-input"
+               [value]="form().department"
+               (input)="updateField('department', $any($event.target).value)"
+               placeholder="ex : Finance" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Contrat & rémunération -->
+  <div class="nx-card">
+    <div class="nx-card__header">
+      <h2 class="nx-card__title">Contrat & rémunération</h2>
+    </div>
+    <div class="nx-card__body">
+      <div class="settings-grid">
+        <div class="nx-form-group">
+          <label class="nx-label" for="contractType">
+            Type de contrat <span class="required" aria-hidden="true">*</span>
+          </label>
+          <select id="contractType" class="nx-input"
+                  [value]="form().contractType"
+                  (change)="updateField('contractType', $any($event.target).value)"
+                  aria-label="Choisir un type de contrat" required>
+            @for (c of contractTypes; track c.value) {
+              <option [value]="c.value">{{ c.label }}</option>
+            }
+          </select>
+        </div>
+        <div class="nx-form-group">
+          <label class="nx-label" for="hireDate">
+            Date d'embauche <span class="required" aria-hidden="true">*</span>
+          </label>
+          <input id="hireDate" type="date" class="nx-input"
+                 [value]="form().hireDate"
+                 (change)="updateField('hireDate', $any($event.target).value)"
+                 required aria-required="true" />
+        </div>
+      </div>
+      <div class="settings-grid">
+        <div class="nx-form-group">
+          <label class="nx-label" for="grossSalary">
+            Salaire brut mensuel <span class="required" aria-hidden="true">*</span>
+          </label>
+          <input id="grossSalary" type="number" class="nx-input nx-input--number"
+                 [value]="form().grossSalary"
+                 (input)="updateField('grossSalary', +$any($event.target).value)"
+                 min="0" step="1000"
+                 required aria-required="true" />
+        </div>
+        <div class="nx-form-group">
+          <label class="nx-label" for="salaryCurrency">
+            Devise <span class="required" aria-hidden="true">*</span>
+          </label>
+          <select id="salaryCurrency" class="nx-input"
+                  [value]="form().salaryCurrency"
+                  (change)="updateField('salaryCurrency', $any($event.target).value)"
+                  aria-label="Choisir une devise" required>
+            @for (c of currencies; track c) {
+              <option [value]="c">{{ c }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <div class="nx-form-group">
+        <label class="nx-label" for="country">
+          Pays (régime social / paie) <span class="required" aria-hidden="true">*</span>
+        </label>
+        <select id="country" class="nx-input"
+                [value]="form().country"
+                (change)="updateField('country', $any($event.target).value)"
+                aria-label="Choisir un pays" required>
+          @for (c of countries; track c.value) {
+            <option [value]="c.value">{{ c.label }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,144 @@
+// Carte KPI — tokens uniquement, lift au survol, shimmer en chargement.
+
+.nx-stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  background: var(--color-neutral-50);
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+  will-change: transform;
+
+  &:hover {
+    transform: translate3d(0, -2px, 0);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+.nx-stat-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.nx-stat-card__label {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-neutral-500);
+}
+
+.nx-stat-card__icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-50);
+  color: var(--color-primary-600);
+  font-family: var(--font-display);
+  font-weight: var(--font-bold);
+  text-transform: uppercase;
+  font-size: var(--text-base);
+}
+
+.nx-stat-card__value {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: var(--font-bold);
+  color: var(--color-neutral-900);
+  line-height: 1.1;
+}
+
+.nx-stat-card__delta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+
+  &--up {
+    color: var(--color-success);
+  }
+
+  &--down {
+    color: var(--color-error);
+  }
+
+  &--neutral {
+    color: var(--color-neutral-500);
+  }
+}
+
+.nx-stat-card__delta-arrow {
+  font-size: var(--text-base);
+  line-height: 1;
+}
+
+// ─── État de chargement (shimmer en transform) ──────────────────────────────
+
+.nx-stat-card__loading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.nx-stat-card__skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--color-neutral-100);
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translate3d(-100%, 0, 0);
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.6) 50%,
+      transparent 100%
+    );
+    animation: nx-stat-shimmer 1.5s infinite;
+    will-change: transform;
+  }
+
+  &--label {
+    width: 50%;
+    height: var(--text-sm);
+  }
+
+  &--value {
+    width: 70%;
+    height: var(--text-3xl);
+  }
+
+  &--delta {
+    width: 30%;
+    height: var(--text-sm);
+  }
+}
+
+@keyframes nx-stat-shimmer {
+  from { transform: translate3d(-100%, 0, 0); }
+  to   { transform: translate3d(100%, 0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nx-stat-card {
+    transition: box-shadow var(--transition-fast);
+
+    &:hover {
+      transform: none;
+    }
+  }
+
+  .nx-stat-card__skeleton::after {
+    animation: none !important;
+  }
+}

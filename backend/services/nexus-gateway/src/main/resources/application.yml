@@ -1,0 +1,198 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: nexus-gateway
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  # OAuth2 Resource Server (JWT validation via Keycloak)
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_URL:http://localhost:8180}/realms/nexuserp
+          jwk-set-uri: ${KEYCLOAK_URL:http://localhost:8180}/realms/nexuserp/protocol/openid-connect/certs
+
+  # Redis (Rate Limiting)
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:nexus_redis_secret}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 20
+          max-idle: 8
+          min-idle: 2
+
+  # Cloud Gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+      default-filters:
+        - name: RequestRateLimiter
+          args:
+            redis-rate-limiter.replenishRate: 100
+            redis-rate-limiter.burstCapacity: 200
+            redis-rate-limiter.requestedTokens: 1
+      httpclient:
+        connect-timeout: 5000
+        response-timeout: 30s
+      metrics:
+        enabled: true
+      routes:
+        # Auth service
+        - id: nexus-auth
+          uri: http://nexus-auth:8080
+          predicates:
+            - Path=/api/v1/auth/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: auth-cb
+                fallbackUri: forward:/fallback/auth
+
+        # Finance service
+        - id: nexus-finance
+          uri: http://nexus-finance:8080
+          predicates:
+            - Path=/api/v1/finance/**,/api/v1/journal-entries/**,/api/v1/invoices/**,/api/v1/accounts/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: finance-cb
+                fallbackUri: forward:/fallback/finance
+
+        # Procurement service
+        - id: nexus-procurement
+          uri: http://nexus-procurement:8080
+          predicates:
+            - Path=/api/v1/procurement/**,/api/v1/purchase-orders/**,/api/v1/suppliers/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: finance-cb
+                fallbackUri: forward:/fallback/procurement
+
+        # Inventory service
+        - id: nexus-inventory
+          uri: http://nexus-inventory:8080
+          predicates:
+            - Path=/api/v1/inventory/**,/api/v1/products/**,/api/v1/warehouses/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: finance-cb
+                fallbackUri: forward:/fallback/inventory
+
+        # Sales service
+        - id: nexus-sales
+          uri: http://nexus-sales:8080
+          predicates:
+            - Path=/api/v1/sales/**,/api/v1/customers/**,/api/v1/sales-orders/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: finance-cb
+                fallbackUri: forward:/fallback/sales
+
+        # HR service
+        - id: nexus-hr
+          uri: http://nexus-hr:8080
+          predicates:
+            - Path=/api/v1/hr/**,/api/v1/employees/**,/api/v1/payroll/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: finance-cb
+                fallbackUri: forward:/fallback/hr
+
+        # Production service
+        - id: nexus-production
+          uri: http://nexus-production:8080
+          predicates:
+            - Path=/api/v1/production/**,/api/v1/work-orders/**,/api/v1/bom/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: finance-cb
+                fallbackUri: forward:/fallback/production
+
+        # AI service
+        - id: nexus-ai
+          uri: http://nexus-ai:8000
+          predicates:
+            - Path=/ai/v1/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: ai-cb
+                fallbackUri: forward:/fallback/ai
+
+        # Notification service
+        - id: nexus-notification
+          uri: http://nexus-notification:8080
+          predicates:
+            - Path=/api/v1/notifications/**
+
+        # Import service
+        - id: nexus-import
+          uri: http://nexus-import:8080
+          predicates:
+            - Path=/api/v1/import/**
+
+        # Reporting service
+        - id: nexus-reporting
+          uri: http://nexus-reporting:8080
+          predicates:
+            - Path=/api/v1/reports/**
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics,gateway
+  endpoint:
+    health:
+      show-details: when_authorized
+    gateway:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      service: nexus-gateway
+
+# Logging
+logging:
+  level:
+    com.nexuserp.gateway: INFO
+    org.springframework.cloud.gateway: INFO
+  pattern:
+    console: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%level","service":"nexus-gateway","traceId":"%X{traceId}","spanId":"%X{spanId}","message":"%message"}%n'
+
+# Resilience4j Circuit Breaker
+resilience4j:
+  circuitbreaker:
+    instances:
+      finance-cb:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 3
+      auth-cb:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 60s
+      ai-cb:
+        slidingWindowSize: 5
+        failureRateThreshold: 60
+        waitDurationInOpenState: 60s

@@ -1,0 +1,128 @@
+<div class="nx-page-header">
+  <div class="nx-page-header__content">
+    <h1 class="nx-page-header__title">Tableau de bord RH</h1>
+    <p class="nx-page-header__subtitle">Vue d'ensemble de l'effectif et de la masse salariale</p>
+  </div>
+  <div class="nx-page-header__actions">
+    <a routerLink="/hr/employees" class="nx-btn nx-btn--ghost">Voir les salariés</a>
+    <a routerLink="/hr/employees/new" class="nx-btn nx-btn--primary">+ Nouvel employé</a>
+  </div>
+</div>
+
+<!-- KPI cards -->
+<div class="kpi-grid">
+  <nx-stat-card
+    label="Effectif total"
+    icon="👥"
+    [value]="formatHeadcount()"
+    [loading]="isLoading()" />
+  <nx-stat-card
+    label="Salariés actifs"
+    icon="✓"
+    [value]="formatActive()"
+    [loading]="isLoading()" />
+  <nx-stat-card
+    label="Masse salariale brute"
+    icon="💶"
+    [value]="formatPayroll()"
+    [loading]="isLoading()" />
+  <nx-stat-card
+    label="Congés en attente"
+    icon="🌴"
+    [value]="formatPendingLeaves()"
+    [loading]="isLoading()" />
+</div>
+
+<div class="dashboard-grid">
+  <!-- Effectif par département -->
+  <div class="nx-card">
+    <div class="nx-card__header">
+      <h2 class="nx-card__title">Effectif par département</h2>
+    </div>
+    <div class="nx-card__body" style="padding: 0;">
+      @if (isLoading()) {
+        <div class="loading-block" role="status" aria-live="polite" aria-label="Chargement">
+          <div class="nx-skeleton" style="height: 1rem; width: 60%;"></div>
+          <div class="nx-skeleton" style="height: 1rem; width: 45%; margin-top: 0.75rem;"></div>
+          <div class="nx-skeleton" style="height: 1rem; width: 70%; margin-top: 0.75rem;"></div>
+        </div>
+      } @else if (departments().length > 0) {
+        <table class="nx-table" aria-label="Effectif par département">
+          <thead>
+            <tr>
+              <th scope="col">Département</th>
+              <th scope="col" style="text-align: right;">Salariés</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (d of departments(); track d.name) {
+              <tr>
+                <td class="name-cell">{{ d.name }}</td>
+                <td style="text-align: right; font-variant-numeric: tabular-nums; font-weight: 600;">
+                  {{ d.count }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <div class="nx-empty-state nx-empty-state--compact">
+          <div class="nx-empty-state__icon" aria-hidden="true">🏢</div>
+          <h3 class="nx-empty-state__title">Aucune donnée</h3>
+          <p class="nx-empty-state__text">
+            Les répartitions s'afficheront dès que des salariés seront enregistrés.
+          </p>
+          <a routerLink="/hr/employees/new" class="nx-btn nx-btn--primary">+ Nouvel employé</a>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Dernières embauches -->
+  <div class="nx-card">
+    <div class="nx-card__header">
+      <h2 class="nx-card__title">Dernières embauches</h2>
+    </div>
+    <div class="nx-card__body" style="padding: 0;">
+      @if (isLoading()) {
+        <div class="loading-block" role="status" aria-live="polite" aria-label="Chargement">
+          <div class="nx-skeleton" style="height: 1rem; width: 70%;"></div>
+          <div class="nx-skeleton" style="height: 1rem; width: 55%; margin-top: 0.75rem;"></div>
+          <div class="nx-skeleton" style="height: 1rem; width: 60%; margin-top: 0.75rem;"></div>
+        </div>
+      } @else if (recentHires().length > 0) {
+        <table class="nx-table" aria-label="Dernières embauches">
+          <thead>
+            <tr>
+              <th scope="col">Salarié</th>
+              <th scope="col">Contrat</th>
+              <th scope="col">Embauche</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (e of recentHires(); track e.id) {
+              <tr>
+                <td class="name-cell">
+                  <a [routerLink]="['/hr/employees', e.id]" class="hire-link">{{ e.fullName }}</a>
+                  @if (e.jobTitle) {
+                    <span class="hire-job">{{ e.jobTitle }}</span>
+                  }
+                </td>
+                <td>{{ contractLabel[e.contractType] || e.contractType }}</td>
+                <td class="date-cell">{{ e.hireDate | date:'dd/MM/yyyy' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <div class="nx-empty-state nx-empty-state--compact">
+          <div class="nx-empty-state__icon" aria-hidden="true">📋</div>
+          <h3 class="nx-empty-state__title">Aucune embauche récente</h3>
+          <p class="nx-empty-state__text">
+            L'historique des embauches apparaîtra ici.
+          </p>
+        </div>
+      }
+    </div>
+  </div>
+</div>

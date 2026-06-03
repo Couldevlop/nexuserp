@@ -1,0 +1,156 @@
+<div class="nx-page-header">
+  <div class="nx-page-header__content">
+    <h1 class="nx-page-header__title">Commandes clients</h1>
+    <p class="nx-page-header__subtitle">
+      {{ totalItems() }} commande{{ totalItems() !== 1 ? 's' : '' }} au total
+    </p>
+  </div>
+  <div class="nx-page-header__actions">
+    <a routerLink="/sales/orders/new" class="nx-btn nx-btn--primary"
+       aria-label="Créer une nouvelle commande">
+      + Nouvelle commande
+    </a>
+  </div>
+</div>
+
+<!-- Filters bar -->
+<div class="filters-bar" role="search" aria-label="Filtres commandes">
+  <div class="filters-bar__search">
+    <input
+      type="search"
+      class="nx-input"
+      placeholder="Rechercher (n° commande, client…)"
+      [value]="searchQuery()"
+      (input)="onSearch($any($event.target).value)"
+      aria-label="Rechercher des commandes"
+    />
+  </div>
+  <div class="filters-bar__status">
+    <select
+      class="nx-input"
+      [value]="statusFilter()"
+      (change)="onStatusChange($any($event.target).value)"
+      aria-label="Filtrer par statut"
+    >
+      @for (opt of statusOptions; track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="nx-card">
+  <div class="nx-card__body" style="padding: 0;">
+    @if (isLoading()) {
+      <div class="loading-state" role="status" aria-live="polite" aria-label="Chargement des commandes">
+        @for (i of [1,2,3,4,5]; track i) {
+          <div class="skeleton-row">
+            <div class="nx-skeleton" style="height: 1rem; width: 14%;"></div>
+            <div class="nx-skeleton" style="height: 1rem; width: 22%;"></div>
+            <div class="nx-skeleton" style="height: 1rem; width: 11%;"></div>
+            <div class="nx-skeleton" style="height: 1.25rem; width: 8%; border-radius: 999px;"></div>
+            <div class="nx-skeleton" style="height: 1rem; width: 10%;"></div>
+            <div class="nx-skeleton" style="height: 1rem; width: 10%;"></div>
+          </div>
+        }
+      </div>
+    } @else if (filteredOrders().length === 0) {
+      <div class="nx-empty-state">
+        <div class="nx-empty-state__icon" aria-hidden="true">🧾</div>
+        <h3 class="nx-empty-state__title">Aucune commande</h3>
+        <p class="nx-empty-state__text">
+          @if (statusFilter() || searchQuery()) {
+            Aucune commande ne correspond à vos critères de recherche.
+          } @else {
+            Créez votre première commande client pour commencer.
+          }
+        </p>
+        @if (!statusFilter() && !searchQuery()) {
+          <a routerLink="/sales/orders/new" class="nx-btn nx-btn--primary">
+            + Nouvelle commande
+          </a>
+        }
+      </div>
+    } @else {
+      <table class="nx-table" aria-label="Liste des commandes clients">
+        <thead>
+          <tr>
+            <th scope="col">N° Commande</th>
+            <th scope="col">Client</th>
+            <th scope="col">Montant TTC</th>
+            <th scope="col">Statut</th>
+            <th scope="col">Date</th>
+            <th scope="col">Livraison souhaitée</th>
+            <th scope="col"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (o of filteredOrders(); track o.id) {
+            <tr class="order-row" [class.order-row--cancelled]="o.status === 'CANCELLED'">
+              <td data-label="N° Commande">
+                <a [routerLink]="['/sales/orders', o.id]" class="order-number-link"
+                   [attr.aria-label]="'Voir la commande ' + o.orderNumber">
+                  {{ o.orderNumber }}
+                </a>
+              </td>
+              <td class="customer-name" data-label="Client">{{ o.customerName }}</td>
+              <td class="amount-cell" data-label="Montant TTC">
+                {{ formatAmount(o.totalAmount, o.currency) }}
+              </td>
+              <td data-label="Statut">
+                <span class="nx-badge" [ngClass]="statusBadgeClass()[o.status]">
+                  {{ statusLabel[o.status] }}
+                </span>
+              </td>
+              <td class="date-cell" data-label="Date">{{ o.orderDate | date:'dd/MM/yyyy' }}</td>
+              <td class="date-cell" data-label="Livraison souhaitée">
+                {{ o.requestedDeliveryDate ? (o.requestedDeliveryDate | date:'dd/MM/yyyy') : '—' }}
+              </td>
+              <td class="actions-cell">
+                <a [routerLink]="['/sales/orders', o.id]" class="nx-btn nx-btn--ghost"
+                   style="font-size: 0.8125rem; padding: 0.25rem 0.5rem;"
+                   [attr.aria-label]="'Voir la commande ' + o.orderNumber">
+                  Voir →
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+        <nav class="pagination" aria-label="Pagination des commandes">
+          <button class="nx-btn nx-btn--ghost pagination__btn"
+                  [disabled]="currentPage() === 0"
+                  (click)="goToPage(currentPage() - 1)"
+                  aria-label="Page précédente">
+            ← Précédent
+          </button>
+
+          <div class="pagination__pages">
+            @for (p of getPages(); track p) {
+              @if (p < 3 || p > totalPages() - 3 || (p >= currentPage() - 1 && p <= currentPage() + 1)) {
+                <button class="pagination__page"
+                        [class.pagination__page--active]="p === currentPage()"
+                        (click)="goToPage(p)"
+                        [attr.aria-label]="'Page ' + (p + 1)"
+                        [attr.aria-current]="p === currentPage() ? 'page' : null">
+                  {{ p + 1 }}
+                </button>
+              }
+            }
+          </div>
+
+          <button class="nx-btn nx-btn--ghost pagination__btn"
+                  [disabled]="currentPage() >= totalPages() - 1"
+                  (click)="goToPage(currentPage() + 1)"
+                  aria-label="Page suivante">
+            Suivant →
+          </button>
+        </nav>
+      }
+    }
+  </div>
+</div>

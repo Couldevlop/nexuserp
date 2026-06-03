@@ -1,0 +1,109 @@
+<div class="nx-page-header">
+  <div class="nx-page-header__content">
+    <h1 class="nx-page-header__title">Tableau de bord Achats</h1>
+    <p class="nx-page-header__subtitle">Vue d'ensemble de l'activité d'approvisionnement</p>
+  </div>
+  <div class="nx-page-header__actions">
+    <a routerLink="/procurement/orders" class="nx-btn nx-btn--ghost">Voir les commandes</a>
+    <a routerLink="/procurement/orders/new" class="nx-btn nx-btn--primary">+ Nouvelle commande d'achat</a>
+  </div>
+</div>
+
+<!-- KPI cards -->
+<div class="kpi-grid">
+  <nx-stat-card
+    label="Commandes en cours"
+    icon="📋"
+    [loading]="isLoading()"
+    [value]="kpiValue(openOrdersCount())"
+  />
+  <nx-stat-card
+    label="Montant engagé"
+    icon="💶"
+    [loading]="isLoading()"
+    [value]="hasData() ? formatAmount(committedAmount()) : '—'"
+  />
+  <nx-stat-card
+    label="Fournisseurs actifs"
+    icon="🏭"
+    [loading]="isLoading()"
+    [value]="kpiValue(activeSuppliersCount())"
+  />
+  <nx-stat-card
+    label="Livraisons attendues"
+    icon="🚚"
+    [loading]="isLoading()"
+    [value]="kpiValue(expectedDeliveriesCount())"
+  />
+</div>
+
+<!-- Recent purchase orders -->
+<div class="nx-card" style="margin-top: var(--space-4);">
+  <div class="nx-card__header">
+    <h2 class="nx-card__title">Commandes récentes</h2>
+    <a routerLink="/procurement/orders" class="nx-btn nx-btn--ghost"
+       style="font-size: 0.8125rem; padding: 0.25rem 0.5rem;">
+      Tout voir →
+    </a>
+  </div>
+  <div class="nx-card__body" style="padding: 0;">
+    @if (isLoading()) {
+      <div class="loading-state" role="status" aria-live="polite" aria-label="Chargement des commandes récentes">
+        @for (i of [1,2,3,4]; track i) {
+          <div class="skeleton-row">
+            <div class="nx-skeleton" style="height: 1rem; width: 16%;"></div>
+            <div class="nx-skeleton" style="height: 1rem; width: 26%;"></div>
+            <div class="nx-skeleton" style="height: 1rem; width: 12%;"></div>
+            <div class="nx-skeleton" style="height: 1.25rem; width: 9%; border-radius: 999px;"></div>
+          </div>
+        }
+      </div>
+    } @else if (recentOrders().length > 0) {
+      <table class="nx-table" aria-label="Commandes d'achat récentes">
+        <thead>
+          <tr>
+            <th scope="col">N° Commande</th>
+            <th scope="col">Fournisseur</th>
+            <th scope="col" style="text-align: right;">Montant TTC</th>
+            <th scope="col">Statut</th>
+            <th scope="col">Livraison prévue</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (o of recentOrders(); track o.id) {
+            <tr>
+              <td data-label="N° Commande">
+                <a [routerLink]="['/procurement/orders', o.id]" class="order-number-link"
+                   [attr.aria-label]="'Voir la commande ' + o.poNumber">
+                  {{ o.poNumber }}
+                </a>
+              </td>
+              <td data-label="Fournisseur" class="name-cell">{{ o.supplierName }}</td>
+              <td data-label="Montant TTC"
+                  style="text-align: right; font-variant-numeric: tabular-nums; font-weight: 600;">
+                {{ formatAmount(o.totalAmount, o.currency) }}
+              </td>
+              <td data-label="Statut">
+                <span class="nx-badge" [ngClass]="getStatusClass(o.status)">
+                  {{ getStatusLabel(o.status) }}
+                </span>
+              </td>
+              <td data-label="Livraison prévue" class="date-cell">
+                {{ o.expectedDeliveryDate ? (o.expectedDeliveryDate | date:'dd/MM/yyyy') : '—' }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    } @else {
+      <div class="nx-empty-state nx-empty-state--compact">
+        <div class="nx-empty-state__icon" aria-hidden="true">📊</div>
+        <h3 class="nx-empty-state__title">Aucune donnée</h3>
+        <p class="nx-empty-state__text">
+          Les indicateurs s'afficheront dès que des commandes d'achat seront enregistrées.
+        </p>
+        <a routerLink="/procurement/orders/new" class="nx-btn nx-btn--primary">+ Nouvelle commande d'achat</a>
+      </div>
+    }
+  </div>
+</div>

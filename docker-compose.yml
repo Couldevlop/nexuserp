@@ -1,0 +1,725 @@
+version: "3.9"
+
+# NexusERP — Dev Local Stack
+# Lance: docker-compose up -d
+# Arrête: docker-compose down -v
+
+networks:
+  nexus-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  postgres_data:
+  kafka_data:
+  redis_data:
+  keycloak_data:
+  minio_data:
+  elasticsearch_data:
+  grafana_data:
+  prometheus_data:
+  loki_data:
+  tempo_data:
+  vault_data:
+  wikijs_data:
+
+services:
+  # ─────────────────────────────────────────
+  # PostgreSQL 16
+  # ─────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: nexus-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: nexus
+      POSTGRES_PASSWORD: nexus_dev_secret
+      POSTGRES_DB: nexuserp
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infrastructure/postgres/init:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"
+    networks:
+      nexus-net:
+        ipv4_address: 172.20.0.10
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexus -d nexuserp"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─────────────────────────────────────────
+  # Apache Kafka 3.x (KRaft mode, sans ZooKeeper)
+  # ─────────────────────────────────────────
+  kafka:
+    image: confluentinc/cp-kafka:7.7.0
+    container_name: nexus-kafka
+    restart: unless-stopped
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    ports:
+      - "9092:9092"
+    networks:
+      nexus-net:
+        ipv4_address: 172.20.0.11
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092 2>/dev/null && echo OK || exit 1"]
+      interval: 15s
+      timeout: 15s
+      retries: 10
+      start_period: 90s
+
+  # ─────────────────────────────────────────
+  # Kafka UI
+  # ─────────────────────────────────────────
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: nexus-kafka-ui
+    restart: unless-stopped
+    environment:
+      KAFKA_CLUSTERS_0_NAME: nexuserp
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    ports:
+      - "8090:8080"
+    depends_on:
+      - kafka
+    networks:
+      - nexus-net
+
+  # ─────────────────────────────────────────
+  # Redis 7.x (Cluster mode simplifié pour dev)
+  # ─────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: nexus-redis
+    restart: unless-stopped
+    command: redis-server --requirepass nexus_redis_secret --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      nexus-net:
+        ipv4_address: 172.20.0.12
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "nexus_redis_secret", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─────────────────────────────────────────
+  # Keycloak 24.x — Identity Provider
+  # ─────────────────────────────────────────
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.2
+    container_name: nexus-keycloak
+    restart: unless-stopped
+    command:
+      - start-dev
+      - --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin_dev_secret
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/nexuserp
+      KC_DB_SCHEMA: keycloak
+      KC_DB_USERNAME: nexus
+      KC_DB_PASSWORD: nexus_dev_secret
+      KC_HTTP_PORT: 8080
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_HTTP_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
+    volumes:
+      - ./infrastructure/keycloak/realms:/opt/keycloak/data/import:ro
+    ports:
+      - "8180:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf --max-time 5 http://localhost:8080/health/ready | grep -q '\"status\":\"UP\"' || curl -sf --max-time 5 http://localhost:8080/health/ready | grep -q UP"]
+      interval: 15s
+      timeout: 10s
+      retries: 25
+      start_period: 120s
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      nexus-net:
+        ipv4_address: 172.20.0.13
+
+  # ─────────────────────────────────────────
+  # MinIO — Object Storage (S3-compatible)
+  # ─────────────────────────────────────────
+  minio:
+    image: minio/minio:latest
+    container_name: nexus-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: nexus_minio
+      MINIO_ROOT_PASSWORD: nexus_minio_secret
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      nexus-net:
+        ipv4_address: 172.20.0.14
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # ─────────────────────────────────────────
+  # Elasticsearch 8.x
+  # ─────────────────────────────────────────
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
+    container_name: nexus-elasticsearch
+    restart: unless-stopped
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    networks:
+      nexus-net:
+        ipv4_address: 172.20.0.15
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ─────────────────────────────────────────
+  # HashiCorp Vault — Secret Management
+  # ─────────────────────────────────────────
+  vault:
+    image: hashicorp/vault:1.17
+    container_name: nexus-vault
+    restart: unless-stopped
+    cap_add:
+      - IPC_LOCK
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: nexus_vault_root_token
+      VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
+    volumes:
+      - vault_data:/vault/data
+    ports:
+      - "8200:8200"
+    networks:
+      nexus-net:
+        ipv4_address: 172.20.0.16
+
+  # ─────────────────────────────────────────
+  # Prometheus
+  # ─────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.53.2
+    container_name: nexus-prometheus
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.console.libraries=/etc/prometheus/console_libraries
+      - --web.console.templates=/etc/prometheus/consoles
+      - --web.enable-lifecycle
+    volumes:
+      - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./infrastructure/prometheus/alerts:/etc/prometheus/alerts:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      nexus-net:
+        ipv4_address: 172.20.0.17
+
+  # ─────────────────────────────────────────
+  # Grafana
+  # ─────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:11.2.0
+    container_name: nexus-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: nexus_grafana_secret
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_FEATURE_TOGGLES_ENABLE: traceqlEditor
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infrastructure/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infrastructure/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    networks:
+      nexus-net:
+        ipv4_address: 172.20.0.18
+
+  # ─────────────────────────────────────────
+  # Loki — Log Aggregation
+  # ─────────────────────────────────────────
+  loki:
+    image: grafana/loki:3.1.1
+    container_name: nexus-loki
+    restart: unless-stopped
+    command: -config.file=/etc/loki/config.yml
+    volumes:
+      - ./infrastructure/loki/config.yml:/etc/loki/config.yml:ro
+      - loki_data:/loki
+    ports:
+      - "3100:3100"
+    networks:
+      nexus-net:
+        ipv4_address: 172.20.0.19
+
+  # ─────────────────────────────────────────
+  # Tempo — Distributed Tracing
+  # ─────────────────────────────────────────
+  tempo:
+    image: grafana/tempo:2.5.0
+    container_name: nexus-tempo
+    restart: unless-stopped
+    command: -config.file=/etc/tempo/config.yml
+    volumes:
+      - ./infrastructure/tempo/config.yml:/etc/tempo/config.yml:ro
+      - tempo_data:/var/tempo
+    ports:
+      - "3200:3200"
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+    networks:
+      nexus-net:
+        ipv4_address: 172.20.0.20
+
+  # ─────────────────────────────────────────
+  # Wiki.js 2.x (v3 not yet published)
+  # ─────────────────────────────────────────
+  wikijs:
+    image: requarks/wiki:2
+    container_name: nexus-wikijs
+    restart: unless-stopped
+    environment:
+      DB_TYPE: postgres
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: nexus
+      DB_PASS: nexus_dev_secret
+      DB_NAME: wikijs
+    volumes:
+      - wikijs_data:/wiki/data
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      nexus-net:
+        ipv4_address: 172.20.0.21
+
+  # ─────────────────────────────────────────
+  # Microservices NexusERP
+  # ─────────────────────────────────────────
+  nexus-gateway:
+    build:
+      context: .
+      dockerfile: backend/services/nexus-gateway/Dockerfile
+    container_name: nexus-gateway
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      KEYCLOAK_URL: http://keycloak:8080
+      REDIS_HOST: redis
+      REDIS_PASSWORD: nexus_redis_secret
+    ports:
+      - "8080:8080"
+    depends_on:
+      keycloak:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO/dev/null http://localhost:8080/actuator/health 2>/dev/null || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      nexus-net:
+        ipv4_address: 172.20.1.1
+
+  nexus-auth:
+    build:
+      context: .
+      dockerfile: backend/services/nexus-auth/Dockerfile
+    container_name: nexus-auth
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: nexuserp
+      DB_USER: nexus
+      DB_PASSWORD: nexus_dev_secret
+      KEYCLOAK_URL: http://keycloak:8080
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_APP_PASSWORD: ${SMTP_APP_PASSWORD:-}
+    ports:
+      - "8081:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      nexus-net:
+        ipv4_address: 172.20.1.2
+
+  nexus-finance:
+    build:
+      context: .
+      dockerfile: backend/services/nexus-finance/Dockerfile
+    container_name: nexus-finance
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: nexuserp
+      DB_USER: nexus
+      DB_PASSWORD: nexus_dev_secret
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      REDIS_HOST: redis
+      REDIS_PASSWORD: nexus_redis_secret
+      KEYCLOAK_URL: http://keycloak:8080
+    ports:
+      - "8082:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      nexus-net:
+        ipv4_address: 172.20.1.3
+
+  nexus-ai:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    container_name: nexus-ai
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://nexus:nexus_dev_secret@postgres:5432/nexuserp
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      AI_ENABLED: "true"
+    ports:
+      - "8085:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      nexus-net:
+        ipv4_address: 172.20.1.6
+
+  nexus-notification:
+    build:
+      context: .
+      dockerfile: backend/services/nexus-notification/Dockerfile
+    container_name: nexus-notification
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: nexuserp
+      DB_USER: nexus
+      DB_PASSWORD: nexus_dev_secret
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KEYCLOAK_URL: http://keycloak:8080
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_APP_PASSWORD: ${SMTP_APP_PASSWORD:-}
+    ports:
+      - "8086:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      nexus-net:
+        ipv4_address: 172.20.1.7
+
+  nexus-procurement:
+    build:
+      context: .
+      dockerfile: backend/services/nexus-procurement/Dockerfile
+    container_name: nexus-procurement
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: nexuserp
+      DB_USER: nexus
+      DB_PASSWORD: nexus_dev_secret
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      REDIS_HOST: redis
+      REDIS_PASSWORD: nexus_redis_secret
+      KEYCLOAK_URL: http://keycloak:8080
+    ports:
+      - "8083:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      nexus-net:
+        ipv4_address: 172.20.1.8
+
+  nexus-inventory:
+    build:
+      context: .
+      dockerfile: backend/services/nexus-inventory/Dockerfile
+    container_name: nexus-inventory
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: nexuserp
+      DB_USER: nexus
+      DB_PASSWORD: nexus_dev_secret
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      REDIS_HOST: redis
+      REDIS_PASSWORD: nexus_redis_secret
+      KEYCLOAK_URL: http://keycloak:8080
+    ports:
+      - "8084:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO/dev/null http://localhost:8080/actuator/health 2>/dev/null || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      nexus-net:
+        ipv4_address: 172.20.1.9
+
+  nexus-sales:
+    build:
+      context: .
+      dockerfile: backend/services/nexus-sales/Dockerfile
+    container_name: nexus-sales
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: nexuserp
+      DB_USER: nexus
+      DB_PASSWORD: nexus_dev_secret
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      REDIS_HOST: redis
+      REDIS_PASSWORD: nexus_redis_secret
+      KEYCLOAK_URL: http://keycloak:8080
+    ports:
+      - "8087:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      nexus-net:
+        ipv4_address: 172.20.1.10
+
+  nexus-hr:
+    build:
+      context: .
+      dockerfile: backend/services/nexus-hr/Dockerfile
+    container_name: nexus-hr
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: nexuserp
+      DB_USER: nexus
+      DB_PASSWORD: nexus_dev_secret
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      REDIS_HOST: redis
+      REDIS_PASSWORD: nexus_redis_secret
+      KEYCLOAK_URL: http://keycloak:8080
+    ports:
+      - "8088:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      nexus-net:
+        ipv4_address: 172.20.1.11
+
+  nexus-production:
+    build:
+      context: .
+      dockerfile: backend/services/nexus-production/Dockerfile
+    container_name: nexus-production
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: nexuserp
+      DB_USER: nexus
+      DB_PASSWORD: nexus_dev_secret
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      REDIS_HOST: redis
+      REDIS_PASSWORD: nexus_redis_secret
+      KEYCLOAK_URL: http://keycloak:8080
+    ports:
+      - "8089:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      nexus-net:
+        ipv4_address: 172.20.1.12
+
+  nexus-import:
+    build:
+      context: .
+      dockerfile: backend/services/nexus-import/Dockerfile
+    container_name: nexus-import
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: nexus_minio_access
+      MINIO_SECRET_KEY: nexus_minio_secret
+      KEYCLOAK_URL: http://keycloak:8080
+    ports:
+      - "8091:8080"
+    depends_on:
+      kafka:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    networks:
+      nexus-net:
+        ipv4_address: 172.20.1.13
+
+  nexus-reporting:
+    build:
+      context: .
+      dockerfile: backend/services/nexus-reporting/Dockerfile
+    container_name: nexus-reporting
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: nexuserp
+      DB_USER: nexus
+      DB_PASSWORD: nexus_dev_secret
+      REDIS_HOST: redis
+      REDIS_PASSWORD: nexus_redis_secret
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: nexus_minio_access
+      MINIO_SECRET_KEY: nexus_minio_secret
+      KEYCLOAK_URL: http://keycloak:8080
+    ports:
+      - "8092:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    networks:
+      nexus-net:
+        ipv4_address: 172.20.1.14
+
+  nexus-payment:
+    build:
+      context: .
+      dockerfile: backend/services/nexus-payment/Dockerfile
+    container_name: nexus-payment
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: nexuserp
+      DB_USER: nexus
+      DB_PASSWORD: nexus_dev_secret
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      REDIS_HOST: redis
+      REDIS_PASSWORD: nexus_redis_secret
+      KEYCLOAK_URL: http://keycloak:8080
+      PAYMENT_CALLBACK_BASE_URL: http://nexus-payment:8080
+      ORANGE_WEBHOOK_SECRET: ${ORANGE_WEBHOOK_SECRET:-dev_orange_secret}
+      WAVE_WEBHOOK_SECRET: ${WAVE_WEBHOOK_SECRET:-dev_wave_secret}
+      MTN_WEBHOOK_SECRET: ${MTN_WEBHOOK_SECRET:-dev_mtn_secret}
+      MOOV_WEBHOOK_SECRET: ${MOOV_WEBHOOK_SECRET:-dev_moov_secret}
+    ports:
+      - "8093:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      nexus-net:
+        ipv4_address: 172.20.1.15
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: nexus-frontend
+    restart: unless-stopped
+    ports:
+      - "4200:80"
+    depends_on:
+      - nexus-gateway
+    networks:
+      nexus-net:
+        ipv4_address: 172.20.2.1

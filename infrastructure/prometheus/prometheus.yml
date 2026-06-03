@@ -1,0 +1,55 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'nexuserp'
+    environment: 'dev'
+
+rule_files:
+  - "alerts/*.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'nexus-gateway'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['nexus-gateway:8080']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: nexus-gateway
+
+  - job_name: 'nexus-auth'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['nexus-auth:8080']
+
+  - job_name: 'nexus-finance'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['nexus-finance:8080']
+
+  - job_name: 'nexus-ai'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['nexus-ai:8000']
+
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+
+  - job_name: 'kafka'
+    static_configs:
+      - targets: ['kafka-exporter:9308']
+
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']

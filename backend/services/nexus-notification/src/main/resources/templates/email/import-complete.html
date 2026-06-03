@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Import terminé — NexusERP</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #F8FAFC; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 32px auto; background: #fff; border-radius: 10px; box-shadow: 0 4px 16px rgba(15,23,42,.12); overflow: hidden; }
+    .header { background: #1E40AF; padding: 24px 32px; text-align: center; }
+    .header h1 { color: #fff; font-size: 22px; margin: 0; }
+    .body { padding: 32px; color: #0F172A; font-size: 15px; line-height: 1.6; }
+    .stats { display: flex; gap: 16px; margin: 20px 0; }
+    .stat { flex: 1; background: #EFF6FF; border-radius: 8px; padding: 16px; text-align: center; }
+    .stat-value { font-size: 28px; font-weight: bold; color: #1E40AF; }
+    .stat-label { font-size: 12px; color: #64748B; margin-top: 4px; }
+    .errors { background: #FEF2F2; border-left: 4px solid #EF4444; padding: 12px 16px; border-radius: 4px; margin: 16px 0; }
+    .footer { background: #F1F5F9; padding: 16px 32px; text-align: center; color: #64748B; font-size: 12px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header"><h1>NexusERP — Import Terminé</h1></div>
+  <div class="body">
+    <p th:text="'Bonjour ' + ${recipientName} + ','">Bonjour,</p>
+    <p>Votre import <strong th:text="${importType}">données</strong> est terminé.</p>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-value" th:text="${totalRows}">0</div>
+        <div class="stat-label">Lignes traitées</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" th:text="${successRows}" style="color:#059669">0</div>
+        <div class="stat-label">Succès</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" th:text="${errorRows}" style="color:#EF4444">0</div>
+        <div class="stat-label">Erreurs</div>
+      </div>
+    </div>
+    <div class="errors" th:if="${errorRows > 0}">
+      <p>Des erreurs ont été détectées. Téléchargez le rapport d'erreurs pour corriger les données et relancer l'import.</p>
+    </div>
+  </div>
+  <div class="footer"><p>© 2026 NexusERP — Intelligence at the Core of Every Decision</p></div>
+</div>
+</body>
+</html>

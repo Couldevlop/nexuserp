@@ -1,0 +1,105 @@
+<nav class="nx-breadcrumb" aria-label="Fil d'Ariane">
+  <a routerLink="/hr/leaves" class="nx-breadcrumb__link">Congés</a>
+  <span class="nx-breadcrumb__sep" aria-hidden="true">/</span>
+  <span class="nx-breadcrumb__current" aria-current="page">Nouvelle demande</span>
+</nav>
+
+<div class="nx-page-header">
+  <div class="nx-page-header__content">
+    <h1 class="nx-page-header__title">Demande de congé</h1>
+  </div>
+  <div class="nx-page-header__actions">
+    <a routerLink="/hr/leaves" class="nx-btn nx-btn--ghost">Annuler</a>
+    <button class="nx-btn nx-btn--primary" (click)="submit()"
+            [disabled]="isSubmitting() || !isValid()"
+            aria-label="Soumettre la demande de congé">
+      @if (isSubmitting()) { Envoi… } @else { Soumettre }
+    </button>
+  </div>
+</div>
+
+<div class="request-grid">
+  <div class="nx-card">
+    <div class="nx-card__header">
+      <h2 class="nx-card__title">Détails de la demande</h2>
+    </div>
+    <div class="nx-card__body">
+      <div class="nx-form-group">
+        <label class="nx-label" for="employeeId">
+          Identifiant salarié <span class="required" aria-hidden="true">*</span>
+        </label>
+        <input id="employeeId" type="text" class="nx-input"
+               [value]="form().employeeId"
+               (input)="updateField('employeeId', $any($event.target).value)"
+               placeholder="UUID du salarié"
+               required aria-required="true" />
+      </div>
+
+      <div class="nx-form-group">
+        <label class="nx-label" for="leaveType">
+          Type de congé <span class="required" aria-hidden="true">*</span>
+        </label>
+        <select id="leaveType" class="nx-input"
+                [value]="form().leaveType"
+                (change)="updateField('leaveType', $any($event.target).value)"
+                aria-label="Choisir un type de congé" required>
+          @for (t of leaveTypes; track t.value) {
+            <option [value]="t.value">{{ t.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="dates-grid">
+        <div class="nx-form-group">
+          <label class="nx-label" for="startDate">
+            Date de début <span class="required" aria-hidden="true">*</span>
+          </label>
+          <input id="startDate" type="date" class="nx-input"
+                 [value]="form().startDate"
+                 (change)="updateField('startDate', $any($event.target).value)"
+                 required aria-required="true" />
+        </div>
+        <div class="nx-form-group">
+          <label class="nx-label" for="endDate">
+            Date de fin <span class="required" aria-hidden="true">*</span>
+          </label>
+          <input id="endDate" type="date" class="nx-input"
+                 [class.nx-input--error]="!datesValid()"
+                 [value]="form().endDate"
+                 (change)="updateField('endDate', $any($event.target).value)"
+                 [attr.aria-invalid]="!datesValid()"
+                 required aria-required="true" />
+          @if (!datesValid()) {
+            <span class="field-error" role="alert">
+              La date de fin doit être postérieure ou égale à la date de début.
+            </span>
+          }
+        </div>
+      </div>
+
+      <div class="nx-form-group">
+        <label class="nx-label" for="reason">Motif</label>
+        <textarea id="reason" class="nx-input" rows="3"
+                  [value]="form().reason"
+                  (input)="updateField('reason', $any($event.target).value)"
+                  placeholder="Motif de la demande (facultatif)"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Récapitulatif -->
+  <div class="nx-card summary-card">
+    <div class="nx-card__header">
+      <h2 class="nx-card__title">Récapitulatif</h2>
+    </div>
+    <div class="nx-card__body">
+      <div class="summary-duration">
+        <span class="summary-duration__value">{{ durationDays() }}</span>
+        <span class="summary-duration__label">jour{{ durationDays() !== 1 ? 's' : '' }}</span>
+      </div>
+      <p class="summary-note">
+        La demande sera soumise pour validation par le responsable RH.
+      </p>
+    </div>
+  </div>
+</div>

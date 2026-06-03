@@ -1,0 +1,123 @@
+# NexusERP — Development environment values
+global:
+  environment: dev
+  image:
+    registry: ghcr.io/openlab
+    tag: latest
+    pullPolicy: Always
+  domain: localhost
+  tenantId: dev-tenant
+  country: FR
+
+# Reduced replicas for dev
+nexus-gateway:
+  replicaCount: 1
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits:   { cpu: 500m, memory: 512Mi }
+  env:
+    SPRING_PROFILES_ACTIVE: dev
+    KEYCLOAK_URL: http://keycloak:8080/realms/nexuserp
+    REDIS_HOST: redis
+    LOG_LEVEL: DEBUG
+
+nexus-finance:
+  replicaCount: 1
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits:   { cpu: 500m, memory: 512Mi }
+  env:
+    SPRING_PROFILES_ACTIVE: dev
+    DB_HOST: postgres
+    KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+
+nexus-hr:
+  replicaCount: 1
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits:   { cpu: 500m, memory: 512Mi }
+
+nexus-inventory:
+  replicaCount: 1
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits:   { cpu: 500m, memory: 512Mi }
+
+nexus-sales:
+  replicaCount: 1
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits:   { cpu: 500m, memory: 512Mi }
+
+nexus-procurement:
+  replicaCount: 1
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits:   { cpu: 500m, memory: 512Mi }
+
+nexus-ai:
+  replicaCount: 1
+  resources:
+    requests: { cpu: 250m, memory: 512Mi }
+    limits:   { cpu: 1000m, memory: 1Gi }
+  env:
+    AI_ENABLED: "true"
+    LOG_LEVEL: DEBUG
+
+nexus-notification:
+  replicaCount: 1
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+    limits:   { cpu: 200m, memory: 256Mi }
+
+nexus-frontend:
+  replicaCount: 1
+  resources:
+    requests: { cpu: 50m, memory: 64Mi }
+    limits:   { cpu: 200m, memory: 128Mi }
+
+# PostgreSQL (dev — single instance)
+postgresql:
+  enabled: true
+  architecture: standalone
+  auth:
+    postgresPassword: dev_password
+    database: nexus
+  primary:
+    resources:
+      requests: { cpu: 100m, memory: 256Mi }
+      limits:   { cpu: 500m, memory: 512Mi }
+
+# Kafka (dev — single broker)
+kafka:
+  enabled: true
+  replicaCount: 1
+  resources:
+    requests: { cpu: 100m, memory: 512Mi }
+    limits:   { cpu: 500m, memory: 1Gi }
+
+# Redis (dev — standalone)
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: false
+  master:
+    resources:
+      requests: { cpu: 50m, memory: 64Mi }
+      limits:   { cpu: 200m, memory: 128Mi }
+
+# Keycloak
+keycloak:
+  enabled: true
+  auth:
+    adminUser: admin
+    adminPassword: admin
+
+# Monitoring (optional in dev)
+prometheus:
+  enabled: false
+grafana:
+  enabled: false
+loki:
+  enabled: false

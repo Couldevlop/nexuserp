@@ -1,0 +1,169 @@
+<div class="nx-page-header">
+  <div class="nx-page-header__content">
+    <h1 class="nx-page-header__title">Salariés</h1>
+    <p class="nx-page-header__subtitle">
+      {{ totalItems() }} salarié{{ totalItems() !== 1 ? 's' : '' }} au total
+    </p>
+  </div>
+  <div class="nx-page-header__actions">
+    <a routerLink="/hr/employees/new" class="nx-btn nx-btn--primary"
+       aria-label="Créer un nouveau salarié">
+      + Nouvel employé
+    </a>
+  </div>
+</div>
+
+<!-- Filters bar -->
+<div class="filters-bar" role="search" aria-label="Filtres salariés">
+  <div class="filters-bar__search">
+    <input
+      type="search"
+      class="nx-input"
+      placeholder="Rechercher (nom, matricule, e-mail, poste…)"
+      [value]="searchQuery()"
+      (input)="onSearch($any($event.target).value)"
+      aria-label="Rechercher des salariés"
+    />
+  </div>
+  <div class="filters-bar__status">
+    <select
+      class="nx-input"
+      [value]="departmentFilter()"
+      (change)="onDepartmentChange($any($event.target).value)"
+      aria-label="Filtrer par département"
+    >
+      <option value="">Tous les départements</option>
+      @for (dep of departments(); track dep) {
+        <option [value]="dep">{{ dep }}</option>
+      }
+    </select>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="nx-card">
+  <div class="nx-card__body" style="padding: 0;">
+    @if (isLoading()) {
+      <div class="loading-state" role="status" aria-live="polite" aria-label="Chargement des salariés">
+        @for (i of [1,2,3,4,5]; track i) {
+          <div class="skeleton-row">
+            <div class="nx-skeleton" style="height: 1rem; width: 12%;"></div>
+            <div class="nx-skeleton" style="height: 1rem; width: 22%;"></div>
+            <div class="nx-skeleton" style="height: 1rem; width: 16%;"></div>
+            <div class="nx-skeleton" style="height: 1.25rem; width: 8%; border-radius: 999px;"></div>
+            <div class="nx-skeleton" style="height: 1.25rem; width: 8%; border-radius: 999px;"></div>
+            <div class="nx-skeleton" style="height: 1rem; width: 10%;"></div>
+          </div>
+        }
+      </div>
+    } @else if (filteredEmployees().length === 0) {
+      <div class="nx-empty-state">
+        <div class="nx-empty-state__icon" aria-hidden="true">👥</div>
+        <h3 class="nx-empty-state__title">Aucun salarié</h3>
+        <p class="nx-empty-state__text">
+          @if (departmentFilter() || searchQuery()) {
+            Aucun salarié ne correspond à vos critères de recherche.
+          } @else {
+            Ajoutez votre premier salarié pour constituer votre effectif.
+          }
+        </p>
+        @if (!departmentFilter() && !searchQuery()) {
+          <a routerLink="/hr/employees/new" class="nx-btn nx-btn--primary">
+            + Nouvel employé
+          </a>
+        }
+      </div>
+    } @else {
+      <table class="nx-table" aria-label="Liste des salariés">
+        <thead>
+          <tr>
+            <th scope="col">Matricule</th>
+            <th scope="col">Salarié</th>
+            <th scope="col">Poste / Département</th>
+            <th scope="col">Contrat</th>
+            <th scope="col">Statut</th>
+            <th scope="col">Embauche</th>
+            <th scope="col"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (e of filteredEmployees(); track e.id) {
+            <tr class="employee-row" [class.employee-row--terminated]="e.status === 'TERMINATED'">
+              <td data-label="Matricule">
+                <a [routerLink]="['/hr/employees', e.id]" class="employee-number-link"
+                   [attr.aria-label]="'Voir le salarié ' + e.fullName">
+                  {{ e.employeeNumber }}
+                </a>
+              </td>
+              <td class="employee-name" data-label="Salarié">
+                <span class="employee-name__full">{{ e.fullName }}</span>
+                @if (e.email) {
+                  <span class="employee-name__email">{{ e.email }}</span>
+                }
+              </td>
+              <td data-label="Poste / Département">
+                <span class="employee-job">{{ e.jobTitle || '—' }}</span>
+                @if (e.department) {
+                  <span class="employee-dept">{{ e.department }}</span>
+                }
+              </td>
+              <td data-label="Contrat">
+                <span class="nx-badge" [ngClass]="contractBadgeClass[e.contractType]">
+                  {{ contractLabel[e.contractType] || e.contractType }}
+                </span>
+              </td>
+              <td data-label="Statut">
+                <span class="nx-badge" [ngClass]="statusBadgeClass[e.status]">
+                  {{ statusLabel[e.status] || e.status }}
+                </span>
+              </td>
+              <td class="date-cell" data-label="Embauche">
+                {{ e.hireDate | date:'dd/MM/yyyy' }}
+              </td>
+              <td class="actions-cell">
+                <a [routerLink]="['/hr/employees', e.id]" class="nx-btn nx-btn--ghost"
+                   style="font-size: 0.8125rem; padding: 0.25rem 0.5rem;"
+                   [attr.aria-label]="'Voir le salarié ' + e.fullName">
+                  Voir →
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+        <nav class="pagination" aria-label="Pagination des salariés">
+          <button class="nx-btn nx-btn--ghost pagination__btn"
+                  [disabled]="currentPage() === 0"
+                  (click)="goToPage(currentPage() - 1)"
+                  aria-label="Page précédente">
+            ← Précédent
+          </button>
+
+          <div class="pagination__pages">
+            @for (p of getPages(); track p) {
+              @if (p < 3 || p > totalPages() - 3 || (p >= currentPage() - 1 && p <= currentPage() + 1)) {
+                <button class="pagination__page"
+                        [class.pagination__page--active]="p === currentPage()"
+                        (click)="goToPage(p)"
+                        [attr.aria-label]="'Page ' + (p + 1)"
+                        [attr.aria-current]="p === currentPage() ? 'page' : null">
+                  {{ p + 1 }}
+                </button>
+              }
+            }
+          </div>
+
+          <button class="nx-btn nx-btn--ghost pagination__btn"
+                  [disabled]="currentPage() >= totalPages() - 1"
+                  (click)="goToPage(currentPage() + 1)"
+                  aria-label="Page suivante">
+            Suivant →
+          </button>
+        </nav>
+      }
+    }
+  </div>
+</div>

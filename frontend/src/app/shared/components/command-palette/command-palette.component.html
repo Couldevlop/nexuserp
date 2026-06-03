@@ -1,0 +1,74 @@
+@if (isOpen()) {
+  <div
+    class="nx-cmd__overlay"
+    (click)="onOverlayClick($event)"
+  >
+    <div
+      class="nx-cmd"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Palette de commandes"
+    >
+      <div class="nx-cmd__search">
+        <span class="nx-cmd__search-icon" aria-hidden="true">⌕</span>
+        <input
+          #searchInput
+          type="text"
+          class="nx-cmd__input"
+          role="combobox"
+          aria-expanded="true"
+          aria-autocomplete="list"
+          [attr.aria-controls]="listboxId"
+          [attr.aria-activedescendant]="activeDescendantId()"
+          placeholder="Rechercher une commande ou une page…"
+          autocomplete="off"
+          spellcheck="false"
+          [value]="query()"
+          (input)="onSearchInput($any($event.target).value)"
+          (keydown)="onKeydown($event)"
+        />
+        <kbd class="nx-cmd__kbd">Esc</kbd>
+      </div>
+
+      <div
+        #resultsList
+        class="nx-cmd__results"
+        [id]="listboxId"
+        role="listbox"
+        aria-label="Résultats"
+      >
+        @if (resultCount() === 0) {
+          <p class="nx-cmd__empty">Aucun résultat pour « {{ query() }} »</p>
+        } @else {
+          @for (grp of grouped(); track grp.group) {
+            <div class="nx-cmd__group" role="group" [attr.aria-label]="grp.group">
+              <p class="nx-cmd__group-title">{{ grp.group }}</p>
+              @for (item of grp.items; track item.id) {
+                <div
+                  class="nx-cmd__option"
+                  [id]="optionId(item)"
+                  role="option"
+                  [class.nx-cmd__option--active]="isHighlighted(item)"
+                  [attr.aria-selected]="isHighlighted(item)"
+                  (mouseenter)="onHover(item)"
+                  (click)="execute(item)"
+                >
+                  <span class="nx-cmd__option-icon" aria-hidden="true">{{ item.icon.charAt(0) }}</span>
+                  <span class="nx-cmd__option-label">{{ item.label }}</span>
+                  <span class="nx-cmd__option-enter" aria-hidden="true">↵</span>
+                </div>
+              }
+            </div>
+          }
+        }
+      </div>
+
+      <div class="nx-cmd__footer">
+        <span class="nx-cmd__hint">↑↓ naviguer · ↵ ouvrir · esc fermer</span>
+        <span class="nx-cmd__live" aria-live="polite">
+          {{ resultCount() }} résultat{{ resultCount() > 1 ? 's' : '' }}
+        </span>
+      </div>
+    </div>
+  </div>
+}

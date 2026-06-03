@@ -1,0 +1,123 @@
+<div class="nx-page-header">
+  <div class="nx-page-header__content">
+    <h1 class="nx-page-header__title">Rapports générés</h1>
+    <p class="nx-page-header__subtitle">
+      {{ totalItems() }} rapport{{ totalItems() !== 1 ? 's' : '' }} demandé{{ totalItems() !== 1 ? 's' : '' }} depuis ce navigateur
+    </p>
+  </div>
+  <div class="nx-page-header__actions">
+    <button type="button" class="nx-btn nx-btn--ghost"
+            (click)="refresh()" aria-label="Actualiser le statut des rapports">
+      ↻ Actualiser
+    </button>
+    <a routerLink="/reporting/reports/new" class="nx-btn nx-btn--primary"
+       aria-label="Demander un nouveau rapport">
+      + Nouveau rapport
+    </a>
+  </div>
+</div>
+
+<!-- Filters bar -->
+<div class="filters-bar" role="search" aria-label="Filtres rapports">
+  <div class="filters-bar__type">
+    <select
+      class="nx-input"
+      [value]="typeFilter()"
+      (change)="onTypeChange($any($event.target).value)"
+      aria-label="Filtrer par type de rapport"
+    >
+      @for (opt of typeOptions; track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="nx-card">
+  <div class="nx-card__body" style="padding: 0;">
+    @if (isLoading()) {
+      <div class="loading-state" role="status" aria-live="polite" aria-label="Chargement des rapports">
+        @for (i of [1,2,3,4]; track i) {
+          <div class="skeleton-row">
+            <div class="nx-skeleton" style="height: 1rem; width: 24%;"></div>
+            <div class="nx-skeleton" style="height: 1rem; width: 16%;"></div>
+            <div class="nx-skeleton" style="height: 1.25rem; width: 9%; border-radius: 999px;"></div>
+            <div class="nx-skeleton" style="height: 1rem; width: 12%;"></div>
+            <div class="nx-skeleton" style="height: 1.75rem; width: 10%; border-radius: 8px;"></div>
+          </div>
+        }
+      </div>
+    } @else if (filteredReports().length === 0) {
+      <div class="nx-empty-state">
+        <div class="nx-empty-state__icon" aria-hidden="true">📄</div>
+        <h3 class="nx-empty-state__title">Aucun rapport</h3>
+        <p class="nx-empty-state__text">
+          @if (typeFilter()) {
+            Aucun rapport de ce type dans l’historique de ce navigateur.
+          } @else {
+            Les rapports que vous demandez apparaissent ici (historique local de
+            ce navigateur). Lancez votre première génération pour commencer.
+          }
+        </p>
+        @if (!typeFilter()) {
+          <a routerLink="/reporting/reports/new" class="nx-btn nx-btn--primary">
+            + Nouveau rapport
+          </a>
+        }
+      </div>
+    } @else {
+      <table class="nx-table" aria-label="Liste des rapports générés">
+        <thead>
+          <tr>
+            <th scope="col">Type de rapport</th>
+            <th scope="col">Demandé le</th>
+            <th scope="col">Statut</th>
+            <th scope="col">Terminé le</th>
+            <th scope="col"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of filteredReports(); track r.id) {
+            <tr class="report-row" [class.report-row--failed]="r.status === 'FAILED'">
+              <td class="type-cell" data-label="Type">
+                {{ typeLabel(r.type) }}
+                @if (r.status === 'FAILED' && r.errorMessage) {
+                  <span class="error-hint" [attr.title]="r.errorMessage">⚠</span>
+                }
+              </td>
+              <td class="date-cell" data-label="Demandé le">
+                {{ r.requestedAt ? (r.requestedAt | date:'dd/MM/yyyy HH:mm') : '—' }}
+              </td>
+              <td data-label="Statut">
+                <span class="nx-badge" [ngClass]="statusBadge(r.status)">
+                  {{ statusLabel(r.status) }}
+                </span>
+              </td>
+              <td class="date-cell" data-label="Terminé le">
+                {{ r.completedAt ? (r.completedAt | date:'dd/MM/yyyy HH:mm') : '—' }}
+              </td>
+              <td class="actions-cell">
+                <button type="button"
+                        class="nx-btn nx-btn--primary download-btn"
+                        [disabled]="!canDownload(r)"
+                        (click)="download(r)"
+                        [attr.aria-label]="canDownload(r)
+                          ? 'Télécharger le rapport ' + typeLabel(r.type)
+                          : 'Téléchargement indisponible — rapport ' + statusLabel(r.status)">
+                  ⤓ Télécharger
+                </button>
+                <button type="button"
+                        class="nx-btn nx-btn--ghost remove-btn"
+                        (click)="remove(r)"
+                        [attr.aria-label]="'Retirer ' + typeLabel(r.type) + ' de l’historique'">
+                  ✕
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>

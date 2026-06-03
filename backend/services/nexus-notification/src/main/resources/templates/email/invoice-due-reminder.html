@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Rappel : Facture à échéance — NexusERP</title>
+    <style>
+        body { font-family: 'DM Sans', Arial, sans-serif; background: #F8FAFC; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 32px auto; background: #fff; border-radius: 16px;
+                     box-shadow: 0 4px 16px rgba(15,23,42,0.12); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #1E40AF, #1E3A8A); padding: 32px 40px; }
+        .header h1 { color: #fff; margin: 0; font-size: 22px; font-weight: 700; }
+        .header p { color: rgba(255,255,255,0.8); margin: 4px 0 0; font-size: 14px; }
+        .body { padding: 32px 40px; }
+        .greeting { font-size: 16px; color: #0F172A; margin-bottom: 16px; }
+        .alert-box { background: #FEF3C7; border-left: 4px solid #F59E0B; padding: 16px 20px;
+                     border-radius: 8px; margin: 24px 0; }
+        .alert-box h3 { margin: 0 0 8px; color: #92400E; font-size: 14px; }
+        .alert-box p { margin: 0; color: #78350F; font-size: 14px; }
+        .invoice-details { background: #F1F5F9; border-radius: 10px; padding: 20px; margin: 24px 0; }
+        .invoice-details table { width: 100%; border-collapse: collapse; }
+        .invoice-details td { padding: 6px 0; font-size: 14px; color: #334155; }
+        .invoice-details td:last-child { text-align: right; font-weight: 600; color: #0F172A; }
+        .cta-btn { display: inline-block; background: #1E40AF; color: #fff !important; padding: 14px 28px;
+                   border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 15px;
+                   margin: 24px 0; }
+        .footer { background: #F1F5F9; padding: 24px 40px; text-align: center; }
+        .footer p { color: #64748B; font-size: 12px; margin: 4px 0; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>NexusERP</h1>
+        <p>Intelligence at the Core of Every Decision</p>
+    </div>
+    <div class="body">
+        <p class="greeting">Bonjour <span th:text="${recipientName}">Utilisateur</span>,</p>
+
+        <p>Une ou plusieurs factures arrivent à échéance dans les prochains jours.</p>
+
+        <div class="alert-box">
+            <h3>⚠️ Rappel d'échéance</h3>
+            <p th:if="${invoiceCount}">
+                <strong th:text="${invoiceCount}">1</strong> facture(s) arrivent à échéance.
+            </p>
+        </div>
+
+        <div class="invoice-details" th:if="${invoiceNumber}">
+            <table>
+                <tr>
+                    <td>Numéro</td>
+                    <td th:text="${invoiceNumber}">FA-2026-000001</td>
+                </tr>
+                <tr>
+                    <td>Client / Fournisseur</td>
+                    <td th:text="${partnerName}">—</td>
+                </tr>
+                <tr>
+                    <td>Montant TTC</td>
+                    <td th:text="${amount}">0,00 €</td>
+                </tr>
+                <tr>
+                    <td>Échéance</td>
+                    <td th:text="${dueDate}">—</td>
+                </tr>
+            </table>
+        </div>
+
+        <a href="#" class="cta-btn">Voir la facture</a>
+
+        <p style="color: #64748B; font-size: 13px;">
+            Cet email a été envoyé automatiquement par NexusERP.<br/>
+            Ne répondez pas à cet email.
+        </p>
+    </div>
+    <div class="footer">
+        <p>© 2026 NexusERP — <span th:text="${tenantId}">votre-entreprise</span></p>
+        <p>Conforme RGPD — <a href="#" style="color: #1E40AF;">Se désabonner</a></p>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,306 @@
+// NexusERP — Layout Shell
+
+.nx-app {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--color-neutral-50);
+}
+
+// ─── Sidebar ─────────────────────────────────────────────────────────────────
+.nx-sidebar {
+  width: var(--sidebar-width);
+  height: 100%;
+  background: var(--color-primary-900);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: width var(--transition-base);
+  overflow: hidden;
+
+  &.collapsed { width: var(--sidebar-width-collapsed); }
+
+  &__logo {
+    padding: var(--space-5) var(--space-6);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
+
+    &-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--color-primary-600);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: #fff;
+      font-weight: var(--font-bold);
+      font-size: var(--text-lg);
+    }
+
+    &-text {
+      color: #fff;
+      font-weight: var(--font-bold);
+      font-size: var(--text-lg);
+      font-family: var(--font-display);
+      white-space: nowrap;
+    }
+  }
+
+  &__nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-3) var(--space-2);
+
+    &::-webkit-scrollbar { width: 4px; }
+    &::-webkit-scrollbar-track { background: transparent; }
+    &::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: var(--radius-full); }
+  }
+
+  &__section {
+    margin-bottom: var(--space-4);
+
+    &-label {
+      padding: var(--space-1) var(--space-3);
+      font-size: var(--text-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(255,255,255,0.4);
+      font-weight: var(--font-semibold);
+      margin-bottom: var(--space-1);
+    }
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    white-space: nowrap;
+
+    &:hover { background: rgba(255,255,255,0.08); color: #fff; }
+
+    &.active {
+      background: var(--color-primary-600);
+      color: #fff;
+    }
+
+    &-icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+  }
+
+  &__footer {
+    padding: var(--space-4) var(--space-3);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
+  }
+}
+
+// ─── Main Content ────────────────────────────────────────────────────────────
+.nx-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+// ─── Header ──────────────────────────────────────────────────────────────────
+.nx-header {
+  height: var(--header-height);
+  background: #fff;
+  border-bottom: 1px solid var(--color-neutral-100);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-6);
+  flex-shrink: 0;
+  box-shadow: var(--shadow-xs);
+  z-index: var(--z-sticky);
+
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  &__breadcrumb {
+    font-size: var(--text-sm);
+    color: var(--color-neutral-500);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+
+    .active { color: var(--color-neutral-800); font-weight: var(--font-semibold); }
+  }
+
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+}
+
+// ─── Page Content ────────────────────────────────────────────────────────────
+.nx-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-6);
+}
+
+.nx-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+
+  &__title {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--color-neutral-900);
+    font-family: var(--font-display);
+  }
+
+  &__subtitle {
+    font-size: var(--text-sm);
+    color: var(--color-neutral-500);
+    margin-top: var(--space-1);
+  }
+
+  &__actions {
+    display: flex;
+    gap: var(--space-3);
+    align-items: center;
+  }
+}
+
+// ─── Dashboard Grid ───────────────────────────────────────────────────────────
+.nx-grid {
+  display: grid;
+  gap: var(--space-4);
+
+  &--2 { grid-template-columns: repeat(2, 1fr); }
+  &--3 { grid-template-columns: repeat(3, 1fr); }
+  &--4 { grid-template-columns: repeat(4, 1fr); }
+
+  @media (max-width: 1024px) {
+    &--4 { grid-template-columns: repeat(2, 1fr); }
+    &--3 { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 640px) {
+    &--2, &--3, &--4 { grid-template-columns: 1fr; }
+  }
+}
+
+// ─── KPI Card ────────────────────────────────────────────────────────────────
+.nx-kpi-card {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-neutral-100);
+
+  &__label {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-neutral-500);
+    font-weight: var(--font-semibold);
+    margin-bottom: var(--space-2);
+  }
+
+  &__value {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--color-neutral-900);
+    font-family: var(--font-display);
+    margin-bottom: var(--space-2);
+  }
+
+  &__trend {
+    font-size: var(--text-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+
+    &--up { color: var(--color-success); }
+    &--down { color: var(--color-error); }
+    &--stable { color: var(--color-neutral-500); }
+  }
+}
+
+// ─── AI Assistant Floating Panel ─────────────────────────────────────────────
+.nx-ai-panel {
+  position: fixed;
+  right: var(--space-6);
+  bottom: var(--space-6);
+  width: 380px;
+  max-height: 600px;
+  background: #fff;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--color-neutral-200);
+  display: flex;
+  flex-direction: column;
+  z-index: var(--z-overlay);
+  transition: all var(--transition-base);
+
+  &.minimized { height: 60px; overflow: hidden; }
+
+  &__header {
+    padding: var(--space-4) var(--space-5);
+    background: linear-gradient(135deg, var(--color-primary-600), var(--color-primary-700));
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    flex-shrink: 0;
+
+    &-title { color: #fff; font-weight: var(--font-semibold); font-size: var(--text-sm); }
+    &-status { width: 8px; height: 8px; border-radius: 50%; background: var(--color-accent-400); }
+  }
+
+  &__messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  &__input {
+    padding: var(--space-3) var(--space-4);
+    border-top: 1px solid var(--color-neutral-100);
+    display: flex;
+    gap: var(--space-2);
+    flex-shrink: 0;
+  }
+}
+
+// ─── Responsive ──────────────────────────────────────────────────────────────
+@media (max-width: 1024px) {
+  .nx-sidebar { width: var(--sidebar-width-collapsed); }
+  .nx-ai-panel { width: calc(100vw - 2 * var(--space-4)); right: var(--space-4); }
+}
+
+@media (max-width: 640px) {
+  .nx-content { padding: var(--space-4); }
+  .nx-page-header { flex-direction: column; align-items: flex-start; gap: var(--space-4); }
+}

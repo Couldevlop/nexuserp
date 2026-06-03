@@ -1,0 +1,179 @@
+<!-- ─── En-tête ─────────────────────────────────────────────────────────────── -->
+<div class="nx-page-header">
+  <div class="nx-page-header__content">
+    <h1 class="nx-page-header__title">Ressources Humaines</h1>
+    <p class="nx-page-header__subtitle">Vue 360° — Effectifs, paie, congés, recrutement</p>
+  </div>
+  <div class="nx-page-header__actions">
+    <a routerLink="/hr/employees/new" class="nx-btn nx-btn--primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nouvel employé
+    </a>
+    <a routerLink="/hr/leaves/new" class="nx-btn nx-btn--secondary">Saisir congé</a>
+  </div>
+</div>
+
+<!-- ─── KPI Cards ─────────────────────────────────────────────────────────── -->
+<section class="hr-kpis" aria-label="Indicateurs RH">
+  @for (kpi of kpis(); track kpi.label) {
+    <div class="kpi-card kpi-card--{{ kpi.color }}">
+      <div class="kpi-card__header">
+        <div class="kpi-card__icon">
+          @switch (kpi.icon) {
+            @case ('users') {
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            }
+            @case ('leave') {
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            }
+            @case ('hire') {
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+            }
+            @case ('turnover') {
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+            }
+          }
+        </div>
+        <span class="kpi-card__label">{{ kpi.label }}</span>
+      </div>
+      <div class="kpi-card__value">{{ kpi.value }}</div>
+      <div class="kpi-card__footer">
+        <span class="kpi-card__subtitle">{{ kpi.subtitle }}</span>
+        @if (kpi.trend) {
+          <span class="kpi-card__trend kpi-card__trend--{{ kpi.trendDir }}">{{ kpi.trend }}</span>
+        }
+      </div>
+    </div>
+  }
+</section>
+
+<!-- ─── Grille 360° ───────────────────────────────────────────────────────── -->
+<div class="hr-grid">
+
+  <!-- Répartition par département -->
+  <section class="nx-card" aria-label="Répartition par département">
+    <div class="nx-card__header">
+      <h2 class="nx-card__title">Effectifs par département</h2>
+      <span class="nx-badge nx-badge--neutral">156 total</span>
+    </div>
+    <div class="nx-card__body">
+      <div class="dept-list">
+        @for (dept of departments(); track dept.name) {
+          <div class="dept-row">
+            <div class="dept-row__header">
+              <span class="dept-row__name">{{ dept.name }}</span>
+              <span class="dept-row__count">{{ dept.count }} <span class="dept-row__pct">({{ dept.pct }}%)</span></span>
+            </div>
+            <div class="dept-row__bar">
+              <div class="dept-row__fill" [style.width.%]="dept.pct" [style.background]="dept.color"></div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Demandes de congé -->
+  <section class="nx-card" aria-label="Demandes de congé récentes">
+    <div class="nx-card__header">
+      <h2 class="nx-card__title">Congés &amp; Absences</h2>
+      <a routerLink="/hr/leaves" class="nx-btn nx-btn--ghost nx-btn--sm">Tout voir →</a>
+    </div>
+    <div class="nx-card__body" style="padding:0;">
+      <table class="nx-table" aria-label="Demandes de congé">
+        <thead>
+          <tr>
+            <th scope="col">Employé</th>
+            <th scope="col">Type</th>
+            <th scope="col">Jours</th>
+            <th scope="col">Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (req of leaveRequests(); track req.name) {
+            <tr>
+              <td>
+                <div class="emp-cell">
+                  <div class="emp-avatar">{{ req.name.charAt(0) }}</div>
+                  <span>{{ req.name }}</span>
+                </div>
+              </td>
+              <td>{{ req.type }}</td>
+              <td><strong>{{ req.days }}j</strong></td>
+              <td>
+                <span class="nx-badge"
+                      [class.nx-badge--warning]="req.status === 'PENDING'"
+                      [class.nx-badge--success]="req.status === 'APPROVED'"
+                      [class.nx-badge--error]="req.status === 'REFUSED'">
+                  {{ req.status === 'PENDING' ? 'En attente' : req.status === 'APPROVED' ? 'Approuvé' : 'Refusé' }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Contrats en fin de période -->
+  <section class="nx-card" aria-label="Contrats en fin de période">
+    <div class="nx-card__header">
+      <h2 class="nx-card__title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-warning)" stroke-width="2.5" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Contrats en fin de période
+      </h2>
+    </div>
+    <div class="nx-card__body">
+      @if (contractAlerts().length === 0) {
+        <p style="color:var(--color-neutral-400);font-size:var(--text-sm);">Aucun contrat n'expire dans les 90 prochains jours.</p>
+      } @else {
+        <div class="contract-alerts">
+          @for (c of contractAlerts(); track c.name) {
+            <div class="contract-row">
+              <div class="contract-row__info">
+                <strong class="contract-row__name">{{ c.name }}</strong>
+                <span class="contract-row__type">{{ c.contract }}</span>
+              </div>
+              <div class="contract-row__end">
+                <span class="contract-row__date">{{ c.endDate | date:'dd/MM/yyyy' }}</span>
+                <span class="nx-badge nx-badge--{{ getDaysLeftColor(c.daysLeft) }}">J–{{ c.daysLeft }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- Résumé paie -->
+  <section class="nx-card" aria-label="Résumé paie du mois">
+    <div class="nx-card__header">
+      <h2 class="nx-card__title">Masse salariale</h2>
+      <span class="nx-badge nx-badge--info">{{ payrollSummary.month }}</span>
+    </div>
+    <div class="nx-card__body">
+      <div class="payroll-summary">
+        <div class="payroll-row">
+          <span class="payroll-row__label">Salaires bruts</span>
+          <span class="payroll-row__val payroll-row__val--primary">{{ payrollSummary.brutTotal }}</span>
+        </div>
+        <div class="payroll-row">
+          <span class="payroll-row__label">Charges patronales</span>
+          <span class="payroll-row__val payroll-row__val--warning">{{ payrollSummary.chargesTotal }}</span>
+        </div>
+        <div class="payroll-row payroll-row--total">
+          <span class="payroll-row__label">Coût total employeur</span>
+          <span class="payroll-row__val payroll-row__val--total">{{ payrollSummary.netTotal }}</span>
+        </div>
+        <div class="payroll-actions">
+          <a routerLink="/hr/payroll" class="nx-btn nx-btn--primary nx-btn--sm">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Générer bulletins
+          </a>
+          <a routerLink="/hr/payroll/dsn" class="nx-btn nx-btn--secondary nx-btn--sm">DSN mensuelle</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>

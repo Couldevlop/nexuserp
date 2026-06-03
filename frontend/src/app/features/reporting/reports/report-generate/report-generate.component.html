@@ -1,0 +1,119 @@
+<nav class="nx-breadcrumb" aria-label="Fil d'Ariane">
+  <a routerLink="/reporting/reports" class="nx-breadcrumb__link">Rapports</a>
+  <span class="nx-breadcrumb__sep" aria-hidden="true">/</span>
+  <span class="nx-breadcrumb__current">Nouveau rapport</span>
+</nav>
+
+<div class="nx-page-header">
+  <div class="nx-page-header__content">
+    <h1 class="nx-page-header__title">Demander un rapport</h1>
+    <p class="nx-page-header__subtitle">
+      La génération est asynchrone : le fichier sera téléchargeable depuis la liste une fois prêt.
+    </p>
+  </div>
+</div>
+
+<form (ngSubmit)="submit()" novalidate>
+  <div class="nx-card">
+    <div class="nx-card__header">
+      <h2 class="nx-card__title">Paramètres du rapport</h2>
+    </div>
+    <div class="nx-card__body">
+      <div class="form-grid">
+        <!-- Type -->
+        <div class="form-field form-field--full">
+          <label class="form-label" for="report-type">
+            Type de rapport<span class="required" aria-hidden="true">*</span>
+          </label>
+          <select
+            id="report-type"
+            class="nx-input"
+            [value]="form().type"
+            (change)="updateField('type', $any($event.target).value)"
+            aria-label="Type de rapport"
+            required
+          >
+            @for (opt of typeOptions; track opt.value) {
+              <option [value]="opt.value">{{ opt.label }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Période début -->
+        <div class="form-field">
+          <label class="form-label" for="period-from">
+            Période — du<span class="required" aria-hidden="true">*</span>
+          </label>
+          <input
+            id="period-from"
+            type="date"
+            class="nx-input"
+            [value]="form().periodFrom"
+            (input)="updateField('periodFrom', $any($event.target).value)"
+            aria-label="Date de début de période"
+            required
+          />
+        </div>
+
+        <!-- Période fin -->
+        <div class="form-field">
+          <label class="form-label" for="period-to">
+            Période — au<span class="required" aria-hidden="true">*</span>
+          </label>
+          <input
+            id="period-to"
+            type="date"
+            class="nx-input"
+            [class.nx-input--error]="dateRangeInvalid()"
+            [value]="form().periodTo"
+            (input)="updateField('periodTo', $any($event.target).value)"
+            aria-label="Date de fin de période"
+            [attr.aria-invalid]="dateRangeInvalid()"
+            required
+          />
+        </div>
+
+        <!-- Format -->
+        <div class="form-field form-field--full">
+          <label class="form-label" for="output-format">Format de sortie</label>
+          <select
+            id="output-format"
+            class="nx-input"
+            [value]="form().outputFormat"
+            (change)="updateField('outputFormat', $any($event.target).value)"
+            aria-label="Format de sortie"
+          >
+            @for (opt of formatOptions; track opt.value) {
+              <option [value]="opt.value">{{ opt.label }}</option>
+            }
+          </select>
+          @if (recommendedFormat()) {
+            <p class="form-hint" role="note">
+              Ce type de rapport est généré au format
+              <strong>{{ recommendedFormat() }}</strong> par le serveur.
+            </p>
+          }
+        </div>
+      </div>
+
+      @if (dateRangeInvalid()) {
+        <p class="form-error" role="alert">
+          La date de début doit être antérieure ou égale à la date de fin.
+        </p>
+      }
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <a routerLink="/reporting/reports" class="nx-btn nx-btn--ghost">Annuler</a>
+    <button
+      type="submit"
+      class="nx-btn nx-btn--primary"
+      [disabled]="!isValid() || isSubmitting()"
+      [attr.aria-busy]="isSubmitting()"
+      aria-label="Lancer la génération du rapport"
+    >
+      @if (isSubmitting()) { Génération en cours… } @else { Générer le rapport }
+    </button>
+  </div>
+</form>

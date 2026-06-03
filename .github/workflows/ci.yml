@@ -1,0 +1,130 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop, 'feature/**', 'fix/**', 'release/**', 'hotfix/**']
+  pull_request:
+    branches: [main, develop]
+
+# OWASP CICD-SEC-2 : GITHUB_TOKEN en moindre privilège (lecture seule par défaut)
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ─── Backend — Java 21 / Maven ──────────────────────────────────────────────
+  backend:
+    name: Backend (Maven)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: nexus_test
+          POSTGRES_USER: nexus
+          POSTGRES_PASSWORD: nexus_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 10s
+          --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+
+      # Gate bloquant : tout le réacteur doit compiler et packager.
+      - name: Build (compile + package)
+        run: mvn -B -ntp clean package -DskipTests
+
+      # Non bloquant pour l'instant (suite de tests en cours de stabilisation).
+      # Passer à bloquant en retirant `continue-on-error` une fois la couverture stabilisée.
+      - name: Unit tests
+        continue-on-error: true
+        run: mvn -B -ntp test
+        env:
+          DB_HOST: localhost
+          DB_PORT: '5432'
+          DB_NAME: nexus_test
+          DB_USER: nexus
+          DB_PASSWORD: nexus_test
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-surefire-reports
+          path: '**/target/surefire-reports/'
+          retention-days: 7
+
+  # ─── Frontend — Angular 18 ──────────────────────────────────────────────────
+  frontend:
+    name: Frontend (Angular)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        continue-on-error: true
+        run: npm run lint
+
+      - name: Unit tests
+        continue-on-error: true
+        run: npm run test:ci
+
+      # Gate bloquant : le build de production doit réussir.
+      - name: Production build
+        run: npm run build
+
+  # ─── AI service — Python 3.12 / FastAPI ─────────────────────────────────────
+  ai-service:
+    name: AI Service (Python)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: ai-service
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Type check (mypy)
+        continue-on-error: true
+        run: mypy app/ --ignore-missing-imports
+
+      - name: Tests (pytest)
+        continue-on-error: true
+        env:
+          ANTHROPIC_API_KEY: test-key
+          AI_ENABLED: 'true'
+        run: pytest -q --asyncio-mode=auto

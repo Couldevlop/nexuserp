@@ -1,0 +1,93 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: nexus-notification
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_APP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+        transport:
+          protocol: smtp
+    test-connection: false
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:nexuserp}
+    username: ${DB_USER:nexus}
+    password: ${DB_PASSWORD:nexus}
+    hikari:
+      schema: nexus_notification
+      maximum-pool-size: 5
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: nexus_notification
+
+  flyway:
+    enabled: true
+    schemas: nexus_notification
+    locations: classpath:db/migration
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_URL:http://localhost:8180}/realms/${KEYCLOAK_REALM:nexuserp}
+
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    cache: true
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: nexus-notification
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    listener:
+      ack-mode: manual_immediate
+      concurrency: 3
+
+nexus:
+  notification:
+    from-name: NexusERP
+    # Passerelle SMS — agrégateurs africains (CI / UEMOA).
+    # Credentials vides -> bascule automatique en mode simulé (dev, aucun appel sortant).
+    sms:
+      provider: ${SMS_PROVIDER:generic}
+      base-url: ${SMS_BASE_URL:}
+      api-key: ${SMS_API_KEY:}
+      sender-id: ${SMS_SENDER_ID:NexusERP}
+    # WhatsApp Business Cloud API (Meta). Credentials vides -> simulé.
+    whatsapp:
+      base-url: ${WHATSAPP_BASE_URL:}
+      api-key: ${WHATSAPP_API_KEY:}
+      from-phone-id: ${WHATSAPP_FROM_PHONE_ID:}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+logging:
+  level:
+    com.nexuserp.notification: INFO

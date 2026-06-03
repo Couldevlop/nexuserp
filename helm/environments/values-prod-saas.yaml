@@ -1,0 +1,237 @@
+# NexusERP — Production SaaS environment values
+global:
+  environment: production
+  image:
+    registry: ghcr.io/openlab
+    tag: stable
+    pullPolicy: IfNotPresent
+  domain: nexuserp.io
+
+nexus-gateway:
+  replicaCount: 3
+  resources:
+    requests: { cpu: 500m, memory: 512Mi }
+    limits:   { cpu: 2000m, memory: 1Gi }
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 20
+    targetCPUUtilizationPercentage: 60
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 2
+  env:
+    SPRING_PROFILES_ACTIVE: production
+    LOG_LEVEL: WARN
+
+nexus-finance:
+  replicaCount: 3
+  resources:
+    requests: { cpu: 500m, memory: 1Gi }
+    limits:   { cpu: 2000m, memory: 2Gi }
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 15
+    targetCPUUtilizationPercentage: 60
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 2
+
+nexus-hr:
+  replicaCount: 2
+  resources:
+    requests: { cpu: 250m, memory: 512Mi }
+    limits:   { cpu: 1000m, memory: 1Gi }
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+
+nexus-inventory:
+  replicaCount: 2
+  resources:
+    requests: { cpu: 250m, memory: 512Mi }
+    limits:   { cpu: 1000m, memory: 1Gi }
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+
+nexus-sales:
+  replicaCount: 2
+  resources:
+    requests: { cpu: 250m, memory: 512Mi }
+    limits:   { cpu: 1000m, memory: 1Gi }
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+
+nexus-procurement:
+  replicaCount: 2
+  resources:
+    requests: { cpu: 250m, memory: 512Mi }
+    limits:   { cpu: 1000m, memory: 1Gi }
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+
+nexus-production:
+  replicaCount: 2
+  resources:
+    requests: { cpu: 250m, memory: 512Mi }
+    limits:   { cpu: 1000m, memory: 1Gi }
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 8
+    targetCPUUtilizationPercentage: 70
+
+nexus-ai:
+  replicaCount: 3
+  resources:
+    requests: { cpu: 1000m, memory: 2Gi }
+    limits:   { cpu: 4000m, memory: 4Gi }
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 60
+  env:
+    AI_ENABLED: "true"
+    WORKERS: "8"
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 2
+
+nexus-notification:
+  replicaCount: 2
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits:   { cpu: 500m, memory: 512Mi }
+
+nexus-import:
+  replicaCount: 2
+  resources:
+    requests: { cpu: 250m, memory: 512Mi }
+    limits:   { cpu: 1000m, memory: 1Gi }
+
+nexus-reporting:
+  replicaCount: 2
+  resources:
+    requests: { cpu: 500m, memory: 1Gi }
+    limits:   { cpu: 2000m, memory: 2Gi }
+
+nexus-frontend:
+  replicaCount: 3
+  resources:
+    requests: { cpu: 50m, memory: 64Mi }
+    limits:   { cpu: 200m, memory: 256Mi }
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 15
+    targetCPUUtilizationPercentage: 70
+
+postgresql:
+  enabled: false  # Use managed RDS/CloudSQL in production
+  external:
+    host: "${DB_HOST}"
+    port: 5432
+    database: nexus
+    existingSecret: nexuserp-db-secret
+
+kafka:
+  enabled: false  # Use managed MSK/Confluent Cloud in production
+  external:
+    bootstrapServers: "${KAFKA_BOOTSTRAP_SERVERS}"
+    existingSecret: nexuserp-kafka-secret
+
+redis:
+  enabled: false  # Use managed ElastiCache/Redis Cloud in production
+  external:
+    host: "${REDIS_HOST}"
+    port: 6379
+    existingSecret: nexuserp-redis-secret
+
+keycloak:
+  enabled: true
+  replicaCount: 3
+  auth:
+    existingSecret: nexuserp-keycloak-secret
+  resources:
+    requests: { cpu: 500m, memory: 1Gi }
+    limits:   { cpu: 2000m, memory: 2Gi }
+
+prometheus:
+  enabled: true
+  retention: 90d
+  resources:
+    requests: { cpu: 500m, memory: 2Gi }
+    limits:   { cpu: 2000m, memory: 4Gi }
+
+grafana:
+  enabled: true
+  auth:
+    existingSecret: nexuserp-grafana-secret
+  persistence:
+    enabled: true
+    size: 10Gi
+
+loki:
+  enabled: true
+  retention: 30d
+
+tempo:
+  enabled: true
+
+elasticsearch:
+  enabled: true
+  replicas: 3
+  resources:
+    requests: { cpu: 1000m, memory: 2Gi }
+    limits:   { cpu: 2000m, memory: 4Gi }
+
+vault:
+  enabled: true
+  server:
+    ha:
+      enabled: true
+      replicas: 3
+
+minio:
+  enabled: false  # Use managed S3 in production
+  external:
+    endpoint: "${MINIO_ENDPOINT}"
+    existingSecret: nexuserp-minio-secret
+
+ingress:
+  enabled: true
+  className: nginx
+  tls:
+    enabled: true
+    certManager:
+      issuer: letsencrypt-prod
+
+# Network policies — zero-trust
+networkPolicies:
+  enabled: true
+  defaultDenyAll: true
+
+# Pod security policies
+podSecurityContext:
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+# Backup (Velero)
+velero:
+  enabled: true
+  schedule: "0 2 * * *"
+  ttl: "720h"

@@ -1,0 +1,106 @@
+<div class="nx-page-header">
+  <div class="nx-page-header__content">
+    <h1 class="nx-page-header__title">Tableau de bord Production</h1>
+    <p class="nx-page-header__subtitle">Vue d'ensemble des ordres de fabrication</p>
+  </div>
+  <div class="nx-page-header__actions">
+    <a routerLink="/production/work-orders" class="nx-btn nx-btn--ghost">Voir les ordres</a>
+    <a routerLink="/production/work-orders/new" class="nx-btn nx-btn--primary">+ Nouvel ordre</a>
+  </div>
+</div>
+
+<!-- KPI cards -->
+<div class="kpi-grid">
+  <nx-stat-card
+    label="OF en cours"
+    [value]="statValue(inProgressCount())"
+    icon="⚙"
+    [loading]="isLoading()"
+  ></nx-stat-card>
+  <nx-stat-card
+    label="OF planifiés"
+    [value]="statValue(plannedCount())"
+    icon="📋"
+    [loading]="isLoading()"
+  ></nx-stat-card>
+  <nx-stat-card
+    label="Taux de réalisation"
+    [value]="completionValue()"
+    icon="✓"
+    [loading]="isLoading()"
+  ></nx-stat-card>
+  <nx-stat-card
+    label="Retards"
+    [value]="statValue(lateCount())"
+    icon="⚠"
+    [loading]="isLoading()"
+  ></nx-stat-card>
+</div>
+
+<!-- Recent work orders -->
+<div class="nx-card" style="margin-top: var(--space-4);">
+  <div class="nx-card__header">
+    <h2 class="nx-card__title">Ordres récents</h2>
+    <a routerLink="/production/work-orders" class="nx-btn nx-btn--ghost"
+       style="font-size: 0.8125rem;">Tout voir →</a>
+  </div>
+  <div class="nx-card__body" style="padding: 0;">
+    @if (isLoading()) {
+      <div class="loading-state" role="status" aria-live="polite" aria-label="Chargement des ordres récents">
+        @for (i of [1,2,3,4]; track i) {
+          <div class="skeleton-row">
+            <div class="nx-skeleton" style="height: 1rem; width: 18%;"></div>
+            <div class="nx-skeleton" style="height: 1rem; width: 30%;"></div>
+            <div class="nx-skeleton" style="height: 1.25rem; width: 10%; border-radius: 999px;"></div>
+            <div class="nx-skeleton" style="height: 1rem; width: 12%;"></div>
+          </div>
+        }
+      </div>
+    } @else if (recentWorkOrders().length > 0) {
+      <table class="nx-table" aria-label="Ordres de fabrication récents">
+        <thead>
+          <tr>
+            <th scope="col">N° OF</th>
+            <th scope="col">Produit</th>
+            <th scope="col">Qté planifiée</th>
+            <th scope="col">Priorité</th>
+            <th scope="col">Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (w of recentWorkOrders(); track w.id) {
+            <tr>
+              <td data-label="N° OF">
+                <a [routerLink]="['/production/work-orders', w.id]" class="wo-number-link"
+                   [attr.aria-label]="'Voir l\'ordre ' + w.orderNumber">
+                  {{ w.orderNumber }}
+                </a>
+              </td>
+              <td class="name-cell" data-label="Produit">{{ w.productName || '—' }}</td>
+              <td class="num-cell" data-label="Qté planifiée">{{ qty(w.quantityPlanned) }}</td>
+              <td data-label="Priorité">
+                <span class="nx-badge" [ngClass]="priorityBadge(w.priority)">
+                  {{ priorityLabel(w.priority) }}
+                </span>
+              </td>
+              <td data-label="Statut">
+                <span class="nx-badge" [ngClass]="statusBadge(w.status)">
+                  {{ statusLabel(w.status) }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    } @else {
+      <div class="nx-empty-state nx-empty-state--compact">
+        <div class="nx-empty-state__icon" aria-hidden="true">🏭</div>
+        <h3 class="nx-empty-state__title">Aucune donnée</h3>
+        <p class="nx-empty-state__text">
+          Les indicateurs s'afficheront dès que des ordres de fabrication seront enregistrés.
+        </p>
+        <a routerLink="/production/work-orders/new" class="nx-btn nx-btn--primary">+ Nouvel ordre</a>
+      </div>
+    }
+  </div>
+</div>

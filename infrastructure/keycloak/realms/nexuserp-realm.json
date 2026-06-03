@@ -1,0 +1,280 @@
+{
+  "realm": "nexuserp",
+  "displayName": "NexusERP",
+  "displayNameHtml": "<strong>NexusERP</strong>",
+  "enabled": true,
+  "loginTheme": "keycloak",
+  "accountTheme": "keycloak.v3",
+  "adminTheme": "keycloak.v2",
+  "emailTheme": "keycloak",
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "permanentLockout": false,
+  "maxFailureWaitSeconds": 900,
+  "minimumQuickLoginWaitSeconds": 60,
+  "waitIncrementSeconds": 60,
+  "quickLoginCheckMilliSeconds": 1000,
+  "maxDeltaTimeSeconds": 43200,
+  "failureFactor": 5,
+  "defaultSignatureAlgorithm": "RS256",
+  "revokeRefreshToken": false,
+  "refreshTokenMaxReuse": 0,
+  "accessTokenLifespan": 28800,
+  "accessTokenLifespanForImplicitFlow": 900,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 2592000,
+  "offlineSessionIdleTimeout": 2592000,
+  "offlineSessionMaxLifespanEnabled": false,
+  "clientSessionIdleTimeout": 0,
+  "clientSessionMaxLifespan": 0,
+  "accessCodeLifespan": 60,
+  "accessCodeLifespanUserAction": 300,
+  "accessCodeLifespanLogin": 1800,
+  "actionTokenGeneratedByAdminLifespan": 43200,
+  "actionTokenGeneratedByUserLifespan": 300,
+  "passwordPolicy": "length(8) and upperCase(1) and digits(1) and notUsername(undefined)",
+  "otpPolicyType": "totp",
+  "otpPolicyAlgorithm": "HmacSHA1",
+  "otpPolicyInitialCounter": 0,
+  "otpPolicyDigits": 6,
+  "otpPolicyLookAheadWindow": 1,
+  "otpPolicyPeriod": 30,
+
+  "roles": {
+    "realm": [
+      { "name": "SUPER_ADMIN",        "description": "Administration plateforme NexusERP" },
+      { "name": "TENANT_ADMIN",       "description": "Administration tenant" },
+      { "name": "FINANCE_MANAGER",    "description": "Validation écritures comptables" },
+      { "name": "FINANCE_USER",       "description": "Saisie comptable" },
+      { "name": "PROCUREMENT_MANAGER","description": "Responsable achats" },
+      { "name": "PROCUREMENT_USER",   "description": "Agent achats" },
+      { "name": "SALES_MANAGER",      "description": "Responsable ventes" },
+      { "name": "SALES_USER",         "description": "Commercial" },
+      { "name": "HR_MANAGER",         "description": "Responsable RH" },
+      { "name": "HR_USER",            "description": "Agent RH" },
+      { "name": "PRODUCTION_MANAGER", "description": "Responsable production" },
+      { "name": "PRODUCTION_USER",    "description": "Opérateur production" },
+      { "name": "INVENTORY_MANAGER",  "description": "Responsable stocks" },
+      { "name": "AUDITOR",            "description": "Auditeur read-only + export" },
+      { "name": "AI_ANALYST",         "description": "Accès dashboards IA" },
+      { "name": "VIEWER",             "description": "Consultation uniquement" }
+    ]
+  },
+
+  "clients": [
+    {
+      "clientId": "nexuserp-frontend",
+      "name": "NexusERP Frontend",
+      "description": "Angular SPA — PKCE public client",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "redirectUris": [
+        "http://localhost/*",
+        "http://localhost:4200/*",
+        "https://*.nexuserp.io/*"
+      ],
+      "webOrigins": [
+        "http://localhost",
+        "http://localhost:4200",
+        "https://*.nexuserp.io"
+      ],
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "access.token.lifespan": "28800"
+      },
+      "fullScopeAllowed": true,
+      "defaultClientScopes": ["openid", "profile", "email", "roles"],
+      "optionalClientScopes": ["offline_access"],
+      "protocolMappers": [
+        {
+          "name": "roles-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "roles",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "name": "tenantId-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "tenantId",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "tenantId",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "name": "country-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "country",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "country",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "name": "fullName-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-full-name-mapper",
+          "consentRequired": false,
+          "config": {
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "nexuserp-gateway",
+      "name": "NexusERP Gateway",
+      "description": "Spring Cloud Gateway — bearer only",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "nexuserp-gateway-secret-dev",
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "bearerOnly": true
+    },
+    {
+      "clientId": "nexuserp-services",
+      "name": "NexusERP Microservices",
+      "description": "Service-to-service client credentials",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "nexuserp-services-secret-dev",
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "serviceAccountsEnabled": true
+    }
+  ],
+
+  "users": [
+    {
+      "username": "admin",
+      "email": "admin@demo.nexuserp.io",
+      "firstName": "Jean",
+      "lastName": "Martin",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Admin1234!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "TENANT_ADMIN",
+        "FINANCE_MANAGER",
+        "PROCUREMENT_MANAGER",
+        "SALES_MANAGER",
+        "HR_MANAGER",
+        "PRODUCTION_MANAGER",
+        "INVENTORY_MANAGER",
+        "AI_ANALYST",
+        "AUDITOR"
+      ],
+      "attributes": {
+        "tenantId": ["demo-tenant"],
+        "country": ["FR"]
+      }
+    },
+    {
+      "username": "finance",
+      "email": "finance@demo.nexuserp.io",
+      "firstName": "Marie",
+      "lastName": "Dupont",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Finance1234!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "FINANCE_MANAGER",
+        "FINANCE_USER",
+        "AUDITOR",
+        "AI_ANALYST"
+      ],
+      "attributes": {
+        "tenantId": ["demo-tenant"],
+        "country": ["FR"]
+      }
+    },
+    {
+      "username": "ops",
+      "email": "ops@demo.nexuserp.io",
+      "firstName": "Paul",
+      "lastName": "Koné",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Ops12345!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "PRODUCTION_MANAGER",
+        "PRODUCTION_USER",
+        "INVENTORY_MANAGER",
+        "PROCUREMENT_MANAGER",
+        "PROCUREMENT_USER"
+      ],
+      "attributes": {
+        "tenantId": ["demo-tenant"],
+        "country": ["CI"]
+      }
+    }
+  ],
+
+  "identityProviders": [],
+
+  "components": {
+    "org.keycloak.services.clientregistration.policy.ClientRegistrationPolicy": [
+      {
+        "name": "Allowed Client Scopes",
+        "providerId": "allowed-client-templates",
+        "subType": "anonymous",
+        "config": { "allow-default-scopes": ["true"] }
+      }
+    ]
+  }
+}

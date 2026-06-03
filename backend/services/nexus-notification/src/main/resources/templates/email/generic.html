@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NexusERP Notification</title>
+  <style>
+    body { font-family: 'DM Sans', Arial, sans-serif; background: #F8FAFC; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 32px auto; background: #fff; border-radius: 10px; box-shadow: 0 4px 16px rgba(15,23,42,.12); overflow: hidden; }
+    .header { background: #1E40AF; padding: 24px 32px; text-align: center; }
+    .header h1 { color: #fff; font-size: 22px; margin: 0; }
+    .body { padding: 32px; color: #0F172A; font-size: 15px; line-height: 1.6; }
+    .footer { background: #F1F5F9; padding: 16px 32px; text-align: center; color: #64748B; font-size: 12px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>NexusERP</h1>
+  </div>
+  <div class="body">
+    <p th:text="'Bonjour ' + ${recipientName} + ','">Bonjour,</p>
+    <p>Vous avez reçu une notification de NexusERP.</p>
+  </div>
+  <div class="footer">
+    <p>© 2026 NexusERP — Intelligence at the Core of Every Decision</p>
+    <p th:text="${tenantId}"></p>
+  </div>
+</div>
+</body>
+</html>

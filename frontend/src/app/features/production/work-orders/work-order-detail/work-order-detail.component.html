@@ -1,0 +1,146 @@
+<nav class="nx-breadcrumb" aria-label="Fil d'Ariane">
+  <a routerLink="/production/work-orders" class="nx-breadcrumb__link">Ordres de fabrication</a>
+  <span class="nx-breadcrumb__sep" aria-hidden="true">/</span>
+  <span class="nx-breadcrumb__current" aria-current="page">
+    {{ workOrder()?.orderNumber ?? '…' }}
+  </span>
+</nav>
+
+@if (isLoading()) {
+  <div class="nx-card" role="status" aria-live="polite" aria-label="Chargement en cours">
+    <div class="nx-card__body detail-skeleton">
+      <div class="nx-skeleton" style="height: 2rem; width: 30%;"></div>
+      <div class="nx-skeleton" style="height: 1rem; width: 50%; margin-top: 0.5rem;"></div>
+      <div class="nx-skeleton" style="height: 12rem; margin-top: 2rem;"></div>
+    </div>
+  </div>
+} @else if (workOrder() !== null) {
+  @if (workOrder(); as w) {
+  <!-- Header -->
+  <div class="wo-detail-header">
+    <div class="wo-detail-header__left">
+      <h1 class="wo-detail-header__number">{{ w.orderNumber }}</h1>
+      <span class="nx-badge" [ngClass]="statusBadge(w.status)"
+            style="font-size: 0.875rem; padding: 0.35rem 0.875rem;">
+        {{ statusLabel(w.status) }}
+      </span>
+      <span class="nx-badge" [ngClass]="priorityBadge(w.priority)">
+        {{ priorityLabel(w.priority) }}
+      </span>
+      @if (w.isLate) {
+        <span class="nx-badge nx-badge--error" aria-label="Ordre en retard">⚠ En retard</span>
+      }
+    </div>
+    <div class="wo-detail-header__actions">
+      @if (canRelease()) {
+        <button class="nx-btn nx-btn--primary" type="button" (click)="release()"
+                [disabled]="actionInProgress() !== null"
+                aria-label="Lancer cet ordre de fabrication">
+          @if (actionInProgress() === 'release') { Lancement… } @else { ▶ Lancer }
+        </button>
+      }
+      @if (canStart()) {
+        <button class="nx-btn nx-btn--primary" type="button" (click)="start()"
+                [disabled]="actionInProgress() !== null"
+                aria-label="Démarrer la production">
+          @if (actionInProgress() === 'start') { Démarrage… } @else { ▶ Démarrer }
+        </button>
+      }
+      @if (canComplete()) {
+        <button class="nx-btn nx-btn--success" type="button" (click)="complete()"
+                [disabled]="actionInProgress() !== null"
+                aria-label="Terminer la production">
+          @if (actionInProgress() === 'complete') { Enregistrement… } @else { ✓ Terminer }
+        </button>
+      }
+      <a routerLink="/production/work-orders" class="nx-btn nx-btn--ghost">← Retour</a>
+    </div>
+  </div>
+
+  <!-- Meta info -->
+  <div class="wo-meta-grid">
+    <div class="nx-card wo-meta-card">
+      <div class="nx-card__body">
+        <h2 class="wo-meta-card__title">Produit</h2>
+        <p class="wo-meta-card__value">{{ w.productName || '—' }}</p>
+        @if (w.productId) {
+          <p class="wo-meta-card__sub">Réf. : {{ w.productId }}</p>
+        }
+        @if (w.workcenter) {
+          <p class="wo-meta-card__sub">Poste : {{ w.workcenter }}</p>
+        }
+        @if (w.operator) {
+          <p class="wo-meta-card__sub">Opérateur : {{ w.operator }}</p>
+        }
+      </div>
+    </div>
+
+    <div class="nx-card wo-meta-card">
+      <div class="nx-card__body">
+        <h2 class="wo-meta-card__title">Planification</h2>
+        <div class="kv-row">
+          <span class="kv-row__label">Début prévu</span>
+          <span class="kv-row__value">
+            {{ w.plannedStartDate ? (w.plannedStartDate | date:'dd/MM/yyyy') : '—' }}
+          </span>
+        </div>
+        <div class="kv-row">
+          <span class="kv-row__label">Fin prévue</span>
+          <span class="kv-row__value">
+            {{ w.plannedEndDate ? (w.plannedEndDate | date:'dd/MM/yyyy') : '—' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="nx-card wo-meta-card">
+      <div class="nx-card__body">
+        <h2 class="wo-meta-card__title">Quantités</h2>
+        <div class="kv-row">
+          <span class="kv-row__label">Planifiée</span>
+          <span class="kv-row__value num">{{ qty(w.quantityPlanned) }}</span>
+        </div>
+        <div class="kv-row">
+          <span class="kv-row__label">Produite</span>
+          <span class="kv-row__value num">{{ qty(w.quantityProduced) }}</span>
+        </div>
+        <div class="kv-row">
+          <span class="kv-row__label">Rebuts</span>
+          <span class="kv-row__value num">{{ qty(w.quantityRejected) }}</span>
+        </div>
+        <div class="kv-row kv-row--accent">
+          <span class="kv-row__label">Rendement</span>
+          <span class="kv-row__value num">{{ rate(w.yieldRate) }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="nx-card">
+    <div class="nx-card__header">
+      <h2 class="nx-card__title">Avancement</h2>
+    </div>
+    <div class="nx-card__body">
+      @if (w.quantityPlanned && w.quantityPlanned > 0) {
+        <div class="progress" role="progressbar"
+             [attr.aria-valuemin]="0"
+             [attr.aria-valuemax]="w.quantityPlanned"
+             [attr.aria-valuenow]="w.quantityProduced ?? 0"
+             [attr.aria-label]="'Quantité produite : ' + qty(w.quantityProduced) + ' sur ' + qty(w.quantityPlanned)">
+          <div class="progress__bar"
+               [style.width.%]="((w.quantityProduced ?? 0) / w.quantityPlanned) * 100"></div>
+        </div>
+        <p class="progress__caption">
+          {{ qty(w.quantityProduced) }} / {{ qty(w.quantityPlanned) }} produits
+          · reste {{ qty(remainingQuantity()) }}
+        </p>
+      } @else {
+        <div class="nx-empty-state nx-empty-state--compact">
+          <p class="nx-empty-state__text">Aucune quantité planifiée renseignée.</p>
+        </div>
+      }
+    </div>
+  </div>
+  }
+}

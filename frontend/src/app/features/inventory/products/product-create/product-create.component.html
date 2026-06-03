@@ -1,0 +1,157 @@
+<nav class="nx-breadcrumb" aria-label="Fil d'Ariane">
+  <a routerLink="/inventory/products" class="nx-breadcrumb__link">Articles</a>
+  <span class="nx-breadcrumb__sep" aria-hidden="true">/</span>
+  <span class="nx-breadcrumb__current" aria-current="page">Nouvel article</span>
+</nav>
+
+<div class="nx-page-header">
+  <div class="nx-page-header__content">
+    <h1 class="nx-page-header__title">Nouvel article</h1>
+  </div>
+  <div class="nx-page-header__actions">
+    <a routerLink="/inventory/products" class="nx-btn nx-btn--ghost">Annuler</a>
+    <button class="nx-btn nx-btn--primary" (click)="submit()" [disabled]="isSubmitting()"
+            aria-label="Enregistrer l'article">
+      @if (isSubmitting()) { Enregistrement… } @else { Enregistrer }
+    </button>
+  </div>
+</div>
+
+<div class="create-grid">
+  <!-- Identification -->
+  <div class="nx-card">
+    <div class="nx-card__header"><h2 class="nx-card__title">Identification</h2></div>
+    <div class="nx-card__body">
+      <div class="nx-form-group">
+        <label class="nx-label" for="code">Code article <span class="required" aria-hidden="true">*</span></label>
+        <input id="code" type="text" class="nx-input"
+               [value]="form().productCode"
+               (input)="patch('productCode', $any($event.target).value)"
+               placeholder="ART-0001" required aria-required="true" />
+      </div>
+      <div class="nx-form-group">
+        <label class="nx-label" for="name">Désignation <span class="required" aria-hidden="true">*</span></label>
+        <input id="name" type="text" class="nx-input"
+               [value]="form().name"
+               (input)="patch('name', $any($event.target).value)"
+               placeholder="Nom de l'article" required aria-required="true" />
+      </div>
+      <div class="nx-form-group">
+        <label class="nx-label" for="category">Catégorie</label>
+        <input id="category" type="text" class="nx-input"
+               [value]="form().category"
+               (input)="patch('category', $any($event.target).value)"
+               placeholder="Ex. Matières premières" />
+      </div>
+      <div class="nx-form-group">
+        <label class="nx-label" for="desc">Description</label>
+        <textarea id="desc" class="nx-input" rows="3"
+                  [value]="form().description"
+                  (input)="patch('description', $any($event.target).value)"
+                  placeholder="Description, références fournisseur…"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stock & valorisation -->
+  <div class="nx-card">
+    <div class="nx-card__header"><h2 class="nx-card__title">Stock & valorisation</h2></div>
+    <div class="nx-card__body">
+      <div class="form-grid">
+        <div class="nx-form-group">
+          <label class="nx-label" for="unit">Unité</label>
+          <select id="unit" class="nx-input"
+                  [value]="form().unit"
+                  (change)="patch('unit', $any($event.target).value)"
+                  aria-label="Unité de mesure">
+            @for (u of units; track u) { <option [value]="u">{{ u }}</option> }
+          </select>
+        </div>
+        <div class="nx-form-group">
+          <label class="nx-label" for="valuation">Méthode de valorisation</label>
+          <select id="valuation" class="nx-input"
+                  [value]="form().valuationMethod"
+                  (change)="patch('valuationMethod', $any($event.target).value)"
+                  aria-label="Méthode de valorisation">
+            @for (m of valuationMethods; track m.value) { <option [value]="m.value">{{ m.label }}</option> }
+          </select>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="nx-form-group">
+          <label class="nx-label" for="reorder">Seuil de réappro</label>
+          <input id="reorder" type="number" class="nx-input"
+                 [value]="form().reorderPoint"
+                 (input)="patch('reorderPoint', +$any($event.target).value)"
+                 min="0" step="0.001" aria-label="Seuil de réapprovisionnement" />
+        </div>
+        <div class="nx-form-group">
+          <label class="nx-label" for="reorderQty">Qté à commander</label>
+          <input id="reorderQty" type="number" class="nx-input"
+                 [value]="form().reorderQuantity"
+                 (input)="patch('reorderQuantity', +$any($event.target).value)"
+                 min="0" step="0.001" aria-label="Quantité de réapprovisionnement" />
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="nx-form-group">
+          <label class="nx-label" for="safety">Stock de sécurité</label>
+          <input id="safety" type="number" class="nx-input"
+                 [value]="form().safetyStock"
+                 (input)="patch('safetyStock', +$any($event.target).value)"
+                 min="0" step="0.001" aria-label="Stock de sécurité" />
+        </div>
+        <div class="nx-form-group">
+          <label class="nx-label" for="initialQty">Quantité initiale</label>
+          <input id="initialQty" type="number" class="nx-input"
+                 [value]="form().initialQty"
+                 (input)="patch('initialQty', +$any($event.target).value)"
+                 min="0" step="0.001" aria-label="Quantité initiale en stock" />
+          <small class="field-hint">À enregistrer via une entrée de stock après création.</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Emplacement & traçabilité -->
+<div class="nx-card">
+  <div class="nx-card__header"><h2 class="nx-card__title">Emplacement & traçabilité</h2></div>
+  <div class="nx-card__body">
+    <div class="form-grid">
+      <div class="nx-form-group">
+        <label class="nx-label" for="warehouse">Entrepôt</label>
+        <input id="warehouse" type="text" class="nx-input"
+               [value]="form().warehouseId"
+               (input)="patch('warehouseId', $any($event.target).value)"
+               placeholder="Ex. WH-ABIDJAN" />
+      </div>
+      <div class="nx-form-group">
+        <label class="nx-label" for="location">Emplacement</label>
+        <input id="location" type="text" class="nx-input"
+               [value]="form().warehouseLocation"
+               (input)="patch('warehouseLocation', $any($event.target).value)"
+               placeholder="Zone A · Allée 3 · Étagère 2" />
+      </div>
+    </div>
+
+    <fieldset class="tracking-fieldset">
+      <legend class="nx-label">Options de traçabilité</legend>
+      <label class="check-row">
+        <input type="checkbox" [checked]="form().lotTracked"
+               (change)="patch('lotTracked', $any($event.target).checked)" />
+        <span>Suivi par lot</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" [checked]="form().serialTracked"
+               (change)="patch('serialTracked', $any($event.target).checked)" />
+        <span>Suivi par numéro de série</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" [checked]="form().expiryTracked"
+               (change)="patch('expiryTracked', $any($event.target).checked)" />
+        <span>Suivi de la date de péremption (DLC/DLUO)</span>
+      </label>
+    </fieldset>
+  </div>
+</div>

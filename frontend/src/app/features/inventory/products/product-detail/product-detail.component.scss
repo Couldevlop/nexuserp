@@ -1,0 +1,184 @@
+.nx-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  font-size: 0.875rem;
+
+  &__link { color: var(--color-primary-600); text-decoration: none; &:hover { text-decoration: underline; } }
+  &__sep { color: var(--color-neutral-400, #94a3b8); }
+  &__current { color: var(--color-neutral-600, #475569); font-weight: 500; }
+}
+
+.detail-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+  }
+
+  &__code {
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--color-neutral-900);
+    letter-spacing: -0.02em;
+  }
+
+  &__actions {
+    display: flex;
+    gap: var(--space-2);
+  }
+}
+
+.detail-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 var(--space-1) 0;
+  color: var(--color-neutral-800, #1e293b);
+}
+
+.detail-desc {
+  color: var(--color-neutral-600, #475569);
+  margin: 0 0 var(--space-4) 0;
+}
+
+.stock-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+
+  @media (max-width: 768px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 420px) { grid-template-columns: 1fr; }
+}
+
+.stock-card {
+  &__label {
+    display: block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-neutral-500, #64748b);
+    margin-bottom: var(--space-1);
+  }
+
+  &__value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-neutral-900);
+
+    small { font-size: 0.875rem; font-weight: 400; color: var(--color-neutral-500, #64748b); }
+
+    &--low { color: var(--color-warning); }
+  }
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+
+  @media (max-width: 768px) { grid-template-columns: 1fr; }
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) 0;
+
+  &:not(:last-child) { border-bottom: 1px solid var(--color-neutral-100, #f1f5f9); }
+
+  &__label { font-size: 0.875rem; color: var(--color-neutral-500, #64748b); }
+  &__value { font-size: 0.875rem; font-weight: 600; color: var(--color-neutral-800, #1e293b); }
+}
+
+.nx-card { margin-bottom: var(--space-4); }
+
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+.num-col { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+.mono { font-family: var(--font-mono); font-size: 0.8125rem; }
+
+.nx-empty-state--compact {
+  padding: var(--space-4);
+  text-align: center;
+}
+
+.lot-row--expired { background: var(--color-error-bg, #fef2f2); }
+.lot-row--near { background: var(--color-warning-bg, #fffbeb); }
+
+// Modal (inline, pas de dépendance shared)
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  z-index: 1000;
+}
+
+.modal-panel {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--color-neutral-100, #f1f5f9);
+  }
+
+  &__title { margin: 0; font-size: 1.125rem; font-weight: 700; }
+
+  &__close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--color-neutral-500, #64748b);
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--radius-sm);
+
+    &:hover { background: var(--color-neutral-100); color: var(--color-neutral-900); }
+  }
+
+  &__body { padding: var(--space-4); }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+}

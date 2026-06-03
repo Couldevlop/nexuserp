@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Bulletin de paie disponible — NexusERP</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #F8FAFC; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 32px auto; background: #fff; border-radius: 10px; box-shadow: 0 4px 16px rgba(15,23,42,.12); overflow: hidden; }
+    .header { background: #1E40AF; padding: 24px 32px; text-align: center; }
+    .header h1 { color: #fff; font-size: 22px; margin: 0; }
+    .body { padding: 32px; color: #0F172A; font-size: 15px; line-height: 1.6; }
+    .info { background: #EFF6FF; border-radius: 8px; padding: 16px 20px; margin: 16px 0; }
+    .btn { display: inline-block; background: #1E40AF; color: #fff; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-weight: bold; margin: 16px 0; }
+    .footer { background: #F1F5F9; padding: 16px 32px; text-align: center; color: #64748B; font-size: 12px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header"><h1>NexusERP RH — Bulletin de Paie</h1></div>
+  <div class="body">
+    <p th:text="'Bonjour ' + ${recipientName} + ','">Bonjour,</p>
+    <p>Votre bulletin de paie pour la période <strong th:text="${period}">-</strong> est disponible.</p>
+    <div class="info">
+      <p><strong>Salaire net :</strong> <span th:text="${netSalary}">-</span></p>
+      <p><strong>Période :</strong> <span th:text="${period}">-</span></p>
+    </div>
+    <a class="btn" th:href="${payslipUrl}" href="#">Consulter mon bulletin</a>
+    <p style="font-size:12px;color:#64748B">Ce document est confidentiel et strictement personnel.</p>
+  </div>
+  <div class="footer"><p>© 2026 NexusERP — Intelligence at the Core of Every Decision</p></div>
+</div>
+</body>
+</html>

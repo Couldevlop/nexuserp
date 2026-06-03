@@ -1,0 +1,135 @@
+# NexusERP — Staging environment values
+global:
+  environment: staging
+  image:
+    registry: ghcr.io/openlab
+    tag: latest
+    pullPolicy: Always
+  domain: staging.nexuserp.io
+  country: FR
+
+nexus-gateway:
+  replicaCount: 2
+  resources:
+    requests: { cpu: 250m, memory: 512Mi }
+    limits:   { cpu: 1000m, memory: 1Gi }
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+  env:
+    SPRING_PROFILES_ACTIVE: staging
+    LOG_LEVEL: INFO
+
+nexus-finance:
+  replicaCount: 2
+  resources:
+    requests: { cpu: 250m, memory: 512Mi }
+    limits:   { cpu: 1000m, memory: 1Gi }
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+
+nexus-hr:
+  replicaCount: 1
+  resources:
+    requests: { cpu: 250m, memory: 512Mi }
+    limits:   { cpu: 1000m, memory: 1Gi }
+
+nexus-inventory:
+  replicaCount: 1
+  resources:
+    requests: { cpu: 250m, memory: 512Mi }
+    limits:   { cpu: 1000m, memory: 1Gi }
+
+nexus-sales:
+  replicaCount: 1
+  resources:
+    requests: { cpu: 250m, memory: 512Mi }
+    limits:   { cpu: 1000m, memory: 1Gi }
+
+nexus-procurement:
+  replicaCount: 1
+  resources:
+    requests: { cpu: 250m, memory: 512Mi }
+    limits:   { cpu: 1000m, memory: 1Gi }
+
+nexus-ai:
+  replicaCount: 2
+  resources:
+    requests: { cpu: 500m, memory: 1Gi }
+    limits:   { cpu: 2000m, memory: 2Gi }
+  env:
+    AI_ENABLED: "true"
+
+nexus-notification:
+  replicaCount: 1
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits:   { cpu: 500m, memory: 512Mi }
+
+nexus-frontend:
+  replicaCount: 2
+  resources:
+    requests: { cpu: 50m, memory: 64Mi }
+    limits:   { cpu: 200m, memory: 256Mi }
+
+postgresql:
+  enabled: true
+  architecture: replication
+  auth:
+    existingSecret: nexuserp-db-secret
+    database: nexus
+  primary:
+    resources:
+      requests: { cpu: 500m, memory: 1Gi }
+      limits:   { cpu: 2000m, memory: 2Gi }
+    persistence:
+      enabled: true
+      size: 20Gi
+
+kafka:
+  enabled: true
+  replicaCount: 3
+  resources:
+    requests: { cpu: 250m, memory: 512Mi }
+    limits:   { cpu: 1000m, memory: 1Gi }
+
+redis:
+  enabled: true
+  architecture: replication
+  auth:
+    enabled: true
+    existingSecret: nexuserp-redis-secret
+  master:
+    resources:
+      requests: { cpu: 100m, memory: 256Mi }
+      limits:   { cpu: 500m, memory: 512Mi }
+
+keycloak:
+  enabled: true
+  replicaCount: 2
+  auth:
+    existingSecret: nexuserp-keycloak-secret
+
+prometheus:
+  enabled: true
+grafana:
+  enabled: true
+  adminPassword: staging_grafana_pass
+
+loki:
+  enabled: true
+tempo:
+  enabled: true
+
+ingress:
+  enabled: true
+  className: nginx
+  tls:
+    enabled: true
+    certManager:
+      issuer: letsencrypt-staging

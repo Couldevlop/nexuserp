@@ -1,0 +1,12 @@
+@for (line of lineArray; track $index) {
+  <div
+    class="nx-skeleton"
+    [style.width]="lines > 1 && $index === lineArray.length - 1 ? '70%' : width"
+    [style.height]="height"
+    [style.border-radius]="borderRadius"
+    [style.margin-bottom]="lines > 1 ? '8px' : '0'"
+    role="progressbar"
+    aria-busy="true"
+    aria-label="Chargement…"
+  ></div>
+}

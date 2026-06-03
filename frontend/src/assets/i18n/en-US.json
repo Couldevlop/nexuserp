@@ -1,0 +1,145 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "import": "Import",
+    "loading": "Loading…",
+    "noData": "No data",
+    "error": "An error occurred",
+    "success": "Operation successful",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "close": "Close",
+    "all": "All",
+    "yes": "Yes",
+    "no": "No",
+    "from": "From",
+    "to": "To",
+    "actions": "Actions",
+    "status": "Status",
+    "date": "Date",
+    "amount": "Amount",
+    "total": "Total",
+    "currency": "Currency",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "city": "City",
+    "country": "Country",
+    "required": "Required",
+    "optional": "Optional",
+    "page": "Page",
+    "of": "of",
+    "rowsPerPage": "Rows per page",
+    "seeAll": "See all"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "finance": "Finance",
+    "procurement": "Procurement",
+    "inventory": "Inventory",
+    "sales": "Sales",
+    "hr": "Human Resources",
+    "production": "Production",
+    "reporting": "Reports",
+    "admin": "Administration",
+    "settings": "Settings",
+    "logout": "Sign out",
+    "aiAssistant": "AI Assistant"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome",
+    "kpi": {
+      "revenue": "Revenue (month)",
+      "pendingInvoices": "Pending invoices",
+      "totalStock": "Total stock",
+      "activeEmployees": "Active employees"
+    },
+    "sections": {
+      "recentInvoices": "Recent invoices",
+      "quickActions": "Quick actions",
+      "stockAlerts": "Stock alerts"
+    }
+  },
+  "finance": {
+    "invoice": {
+      "title": "Invoice",
+      "titlePlural": "Invoices",
+      "number": "Invoice #",
+      "create": "New invoice",
+      "customer": "Customer",
+      "dueDate": "Due date",
+      "subtotal": "Subtotal (excl. tax)",
+      "tax": "Tax",
+      "total": "Total (incl. tax)",
+      "notes": "Notes",
+      "lines": "Line items",
+      "lineDescription": "Description",
+      "lineQty": "Qty",
+      "lineUnitPrice": "Unit price",
+      "lineDiscount": "Discount %",
+      "lineTaxRate": "Tax rate",
+      "lineTotal": "Total",
+      "addLine": "+ Add line",
+      "status": {
+        "DRAFT": "Draft",
+        "SUBMITTED": "Submitted",
+        "APPROVED": "Approved",
+        "PAID": "Paid",
+        "OVERDUE": "Overdue",
+        "CANCELLED": "Cancelled"
+      },
+      "actions": {
+        "approve": "Approve",
+        "approving": "Approving…",
+        "submit": "Submit",
+        "markPaid": "Mark as paid",
+        "cancel": "Cancel invoice"
+      },
+      "messages": {
+        "created": "Invoice created successfully",
+        "approved": "Invoice approved successfully",
+        "notFound": "Invoice not found",
+        "createError": "Error creating invoice",
+        "approveError": "Approval failed"
+      }
+    },
+    "journal": {
+      "title": "Accounting journal",
+      "entry": "Journal entry"
+    }
+  },
+  "auth": {
+    "login": "Sign in",
+    "logout": "Sign out",
+    "redirecting": "Redirecting to authentication…",
+    "accessDenied": "Access denied — insufficient permissions",
+    "sessionExpired": "Session expired, signing in…"
+  },
+  "ai": {
+    "assistant": "AI Assistant",
+    "placeholder": "Ask a question about your data…",
+    "send": "Send",
+    "thinking": "Thinking…",
+    "greeting": "Hello! I'm your NexusERP assistant. How can I help you?",
+    "disabled": "AI assistant is not available at this time.",
+    "error": "Error communicating with the AI assistant"
+  },
+  "errors": {
+    "unauthorized": "Session expired. Signing in…",
+    "forbidden": "Access denied — insufficient permissions for this module",
+    "rateLimited": "Too many requests — please wait",
+    "serverError": "Server error — please try again in a moment",
+    "networkError": "Network connection error"
+  }
+}

@@ -1,0 +1,142 @@
+<div class="nx-page-header">
+  <div class="nx-page-header__content">
+    <h1 class="nx-page-header__title">Mouvements de stock</h1>
+    <p class="nx-page-header__subtitle">
+      @if (!notAvailable()) {
+        {{ totalItems() }} mouvement{{ totalItems() !== 1 ? 's' : '' }}
+      } @else {
+        Historique des entrées, sorties et ajustements
+      }
+    </p>
+  </div>
+  <div class="nx-page-header__actions">
+    <a routerLink="/inventory/products" class="nx-btn nx-btn--ghost">Articles</a>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="filters-bar" role="search" aria-label="Filtres mouvements">
+  <div class="filters-bar__item">
+    <select class="nx-input"
+            [value]="typeFilter()"
+            (change)="onTypeChange($any($event.target).value)"
+            aria-label="Filtrer par type de mouvement">
+      @for (opt of typeOptions; track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+  </div>
+  <div class="filters-bar__item">
+    <label class="date-label" for="from">Du</label>
+    <input id="from" type="date" class="nx-input"
+           [value]="dateFrom()"
+           (change)="onDateFrom($any($event.target).value)"
+           aria-label="Date de début" />
+  </div>
+  <div class="filters-bar__item">
+    <label class="date-label" for="to">Au</label>
+    <input id="to" type="date" class="nx-input"
+           [value]="dateTo()"
+           (change)="onDateTo($any($event.target).value)"
+           aria-label="Date de fin" />
+  </div>
+</div>
+
+<div class="nx-card">
+  <div class="nx-card__body" style="padding: 0;">
+    @if (isLoading()) {
+      <div class="loading-state" role="status" aria-live="polite">
+        <span class="sr-only">Chargement des mouvements…</span>
+        @for (i of [1,2,3,4,5]; track i) {
+          <div class="skeleton-row">
+            <div class="nx-skeleton" style="height: 1rem; width: 14%;"></div>
+            <div class="nx-skeleton" style="height: 1.25rem; width: 8%; border-radius: 999px;"></div>
+            <div class="nx-skeleton" style="height: 1rem; width: 26%;"></div>
+            <div class="nx-skeleton" style="height: 1rem; width: 10%;"></div>
+            <div class="nx-skeleton" style="height: 1rem; width: 14%;"></div>
+          </div>
+        }
+      </div>
+    } @else if (notAvailable()) {
+      <div class="nx-empty-state">
+        <div class="nx-empty-state__icon" aria-hidden="true">🕓</div>
+        <h3 class="nx-empty-state__title">Historique indisponible</h3>
+        <p class="nx-empty-state__text">
+          Le journal des mouvements de stock n'est pas encore exposé par le serveur.
+          Les entrées et sorties restent enregistrées sur chaque article.
+        </p>
+        <a routerLink="/inventory/products" class="nx-btn nx-btn--primary">Voir les articles</a>
+      </div>
+    } @else if (movements().length === 0) {
+      <div class="nx-empty-state">
+        <div class="nx-empty-state__icon" aria-hidden="true">🔁</div>
+        <h3 class="nx-empty-state__title">Aucun mouvement</h3>
+        <p class="nx-empty-state__text">Aucun mouvement ne correspond à vos critères.</p>
+      </div>
+    } @else {
+      <div class="table-scroll">
+        <table class="nx-table" aria-label="Historique des mouvements de stock">
+          <thead>
+            <tr>
+              <th scope="col">Date</th>
+              <th scope="col">Type</th>
+              <th scope="col">Article</th>
+              <th scope="col" class="num-col">Quantité</th>
+              <th scope="col">Entrepôt</th>
+              <th scope="col">Référence</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (m of movements(); track trackById($index, m)) {
+              <tr>
+                <td class="date-cell">{{ m.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td>
+                  <span class="nx-badge" [ngClass]="movementBadge[m.type]">{{ movementLabel[m.type] }}</span>
+                </td>
+                <td class="article-cell">
+                  <a [routerLink]="['/inventory/products', m.productId]" class="article-link">
+                    <span class="article-code">{{ m.productCode }}</span>
+                    <span class="article-name">{{ m.productName }}</span>
+                  </a>
+                </td>
+                <td class="num-col qty-cell">{{ m.quantity | number:'1.0-3' }} <span class="unit">{{ m.unit }}</span></td>
+                <td class="warehouse-cell">
+                  @if (m.type === 'TRANSFER') {
+                    {{ m.warehouseFrom || '—' }} → {{ m.warehouseTo || '—' }}
+                  } @else {
+                    {{ m.warehouseTo || m.warehouseFrom || '—' }}
+                  }
+                </td>
+                <td class="ref-cell">{{ m.reference || m.reason || '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (totalPages() > 1) {
+        <nav class="pagination" aria-label="Pagination des mouvements">
+          <button class="nx-btn nx-btn--ghost pagination__btn"
+                  [disabled]="currentPage() === 0"
+                  (click)="goToPage(currentPage() - 1)"
+                  aria-label="Page précédente">← Précédent</button>
+          <div class="pagination__pages">
+            @for (pg of getPages(); track pg) {
+              @if (pg < 3 || pg > totalPages() - 3 || (pg >= currentPage() - 1 && pg <= currentPage() + 1)) {
+                <button class="pagination__page"
+                        [class.pagination__page--active]="pg === currentPage()"
+                        (click)="goToPage(pg)"
+                        [attr.aria-label]="'Page ' + (pg + 1)"
+                        [attr.aria-current]="pg === currentPage() ? 'page' : null">{{ pg + 1 }}</button>
+              }
+            }
+          </div>
+          <button class="nx-btn nx-btn--ghost pagination__btn"
+                  [disabled]="currentPage() >= totalPages() - 1"
+                  (click)="goToPage(currentPage() + 1)"
+                  aria-label="Page suivante">Suivant →</button>
+        </nav>
+      }
+    }
+  </div>
+</div>

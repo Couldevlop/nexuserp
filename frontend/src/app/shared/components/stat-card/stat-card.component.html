@@ -1,0 +1,37 @@
+<article
+  class="nx-stat-card"
+  [attr.aria-busy]="loading()"
+  [attr.aria-label]="loading() ? 'Chargement de la statistique' : null"
+>
+  @if (loading()) {
+    <div class="nx-stat-card__loading" role="progressbar" aria-label="Chargement…">
+      <div class="nx-stat-card__skeleton nx-stat-card__skeleton--label"></div>
+      <div class="nx-stat-card__skeleton nx-stat-card__skeleton--value"></div>
+      <div class="nx-stat-card__skeleton nx-stat-card__skeleton--delta"></div>
+    </div>
+  } @else {
+    <div class="nx-stat-card__header">
+      <p class="nx-stat-card__label">{{ label() }}</p>
+      @if (icon()) {
+        <span class="nx-stat-card__icon" aria-hidden="true">{{ icon().charAt(0) }}</span>
+      }
+    </div>
+
+    <p class="nx-stat-card__value">{{ value() }}</p>
+
+    @if (hasDelta()) {
+      <p
+        class="nx-stat-card__delta"
+        [class.nx-stat-card__delta--up]="deltaDirection() === 'up'"
+        [class.nx-stat-card__delta--down]="deltaDirection() === 'down'"
+        [class.nx-stat-card__delta--neutral]="deltaDirection() === 'neutral'"
+        [attr.aria-label]="deltaAria()"
+      >
+        <span class="nx-stat-card__delta-arrow" aria-hidden="true">
+          {{ deltaDirection() === 'up' ? '↑' : deltaDirection() === 'down' ? '↓' : '→' }}
+        </span>
+        {{ deltaLabel() }}
+      </p>
+    }
+  }
+</article>

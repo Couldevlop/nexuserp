@@ -1,0 +1,11 @@
+.git
+.gitignore
+**/*.md
+**/.DS_Store
+**/node_modules
+**/dist
+**/.angular
+**/coverage
+**/*.log
+**/target
+**/.mvn/repository
