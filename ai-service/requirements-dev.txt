@@ -10,4 +10,4 @@ black==24.10.0
 types-python-jose==3.3.4.20240106
 
 # Type stubs
-pandas-stubs==2.2.3.240807
+pandas-stubs==2.2.3.241009
