@@ -16,15 +16,18 @@
 set -euo pipefail
 
 ENVIRONMENT="${1:?usage: deploy.sh <staging|prod> [image_tag]}"
-TAG="${2:-latest}"
 SSH_TARGET="${NEXUS_SSH:?définis NEXUS_SSH=user@62.238.11.20}"
 OWNER="${GHCR_OWNER:-couldevlop}"
 
 case "$ENVIRONMENT" in
-  staging) NS="nexuserp-staging"; VALUES="values-staging.yaml" ;;
-  prod)    NS="nexuserp-prod";    VALUES="values-prod.yaml" ;;
+  staging) NS="nexuserp-staging"; VALUES="values-staging.yaml"; DEFAULT_TAG="develop" ;;
+  prod)    NS="nexuserp-prod";    VALUES="values-prod.yaml";    DEFAULT_TAG="main" ;;
   *) echo "Environnement invalide '$ENVIRONMENT' (staging|prod)"; exit 1 ;;
 esac
+
+# Par défaut : l'image taguée du nom de branche (develop/main) publiée par la CI.
+# Sinon, passe un tag précis : ./scripts/deploy.sh prod sha-1a2b3c4
+TAG="${2:-$DEFAULT_TAG}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CHART_DIR="$SCRIPT_DIR/../helm/charts/nexuserp"

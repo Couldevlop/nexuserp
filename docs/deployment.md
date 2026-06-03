@@ -73,10 +73,13 @@ ingress **Traefik** (défaut k3s), et pour le TLS prod **cert-manager** + Cluste
 export NEXUS_SSH=<user>@62.238.11.20    # ta cible SSH
 export GHCR_OWNER=<owner_minuscule>     # défaut : couldevlop
 
-# staging (dernier build de develop)
-./scripts/deploy.sh staging sha-1a2b3c4
+# staging — déploie l'image taguée 'develop' (dernier build de la branche) par défaut
+./scripts/deploy.sh staging
 
-# production
+# production — déploie l'image taguée 'main' par défaut
+./scripts/deploy.sh prod
+
+# …ou un build précis par son SHA
 ./scripts/deploy.sh prod sha-1a2b3c4
 ```
 
