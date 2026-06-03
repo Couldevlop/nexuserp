@@ -1,0 +1,85 @@
+# Valeurs par défaut — chart générique NexusERP
+global:
+  image:
+    registry: ghcr.io/couldevlop      # ghcr.io/<owner>
+    tag: latest                       # surchargé par la CI avec le SHA
+    pullPolicy: IfNotPresent
+  imagePullSecrets:
+    - name: ghcr-pull                 # secret docker-registry créé dans le namespace
+  domain: nexuserp.local              # surchargé par env (staging/prod)
+  # ConfigMap + Secret d'environnement appliqués à TOUS les services (envFrom).
+  # À créer dans le namespace (le script de déploiement peut le faire).
+  envConfigMap: nexuserp-config
+  envSecret: nexuserp-secrets
+  ingress:
+    enabled: true
+    className: traefik                # ingress par défaut de k3s
+    tls: false
+    clusterIssuer: ""                # ex: letsencrypt-prod (cert-manager) → active TLS
+
+defaults:
+  replicas: 1
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits:   { cpu: 500m, memory: 512Mi }
+
+# Liste des services applicatifs. Les services Java exposent /actuator/health.
+services:
+  - name: nexus-gateway
+    image: nexus-gateway
+    port: 8080
+    health: /actuator/health
+    ingress: { enabled: true, host: api }   # api.<domain>
+  - name: nexus-auth
+    image: nexus-auth
+    port: 8080
+    health: /actuator/health
+  - name: nexus-finance
+    image: nexus-finance
+    port: 8080
+    health: /actuator/health
+  - name: nexus-procurement
+    image: nexus-procurement
+    port: 8080
+    health: /actuator/health
+  - name: nexus-inventory
+    image: nexus-inventory
+    port: 8080
+    health: /actuator/health
+  - name: nexus-sales
+    image: nexus-sales
+    port: 8080
+    health: /actuator/health
+  - name: nexus-hr
+    image: nexus-hr
+    port: 8080
+    health: /actuator/health
+  - name: nexus-production
+    image: nexus-production
+    port: 8080
+    health: /actuator/health
+  - name: nexus-notification
+    image: nexus-notification
+    port: 8080
+    health: /actuator/health
+  - name: nexus-import
+    image: nexus-import
+    port: 8080
+    health: /actuator/health
+  - name: nexus-reporting
+    image: nexus-reporting
+    port: 8080
+    health: /actuator/health
+  - name: nexus-payment
+    image: nexus-payment
+    port: 8080
+    health: /actuator/health
+  - name: nexus-ai
+    image: nexus-ai
+    port: 8000
+    health: /health
+  - name: nexus-frontend
+    image: nexus-frontend
+    port: 80
+    health: /
+    ingress: { enabled: true, host: "" }    # apex <domain>

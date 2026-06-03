@@ -1,0 +1,6 @@
+apiVersion: v2
+name: nexuserp
+description: Chart générique NexusERP — déploie tous les microservices applicatifs sur k3s
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

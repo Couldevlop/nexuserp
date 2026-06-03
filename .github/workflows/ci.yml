@@ -84,14 +84,23 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        run: npm ci
+        # npm ci (strict) ; fallback npm install si le lockfile n'est pas encore resynchronisé
+        run: npm ci || npm install
 
       - name: Lint
         continue-on-error: true
         run: npm run lint
 
+      - name: Set up Chrome (pour Karma headless)
+        id: setup-chrome
+        uses: browser-actions/setup-chrome@v1
+
+      # Non bloquant : specs présentes mais non encore toutes exécutées/validées.
+      # Retirer `continue-on-error` une fois la suite stabilisée pour la rendre requise.
       - name: Unit tests
         continue-on-error: true
+        env:
+          CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
         run: npm run test:ci
 
       # Gate bloquant : le build de production doit réussir.

@@ -1,0 +1,13 @@
+# Override staging (branche develop → namespace nexuserp-staging)
+global:
+  domain: staging.nexuserp.example     # ⚠️ remplace par ton domaine/sous-domaine réel
+  image:
+    pullPolicy: Always
+  ingress:
+    enabled: true
+    className: traefik
+    tls: false
+    clusterIssuer: ""
+
+defaults:
+  replicas: 1

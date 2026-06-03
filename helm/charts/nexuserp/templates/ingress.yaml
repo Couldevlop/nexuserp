@@ -1,0 +1,38 @@
+{{- if .Values.global.ingress.enabled }}
+{{- range .Values.services }}
+{{- if and .ingress .ingress.enabled }}
+{{- $host := include "nexuserp.ingressHost" (dict "svc" . "root" $) }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .name }}
+  labels:
+    app.kubernetes.io/name: {{ .name }}
+    {{- include "nexuserp.labels" $ | nindent 4 }}
+  annotations:
+    {{- if $.Values.global.ingress.clusterIssuer }}
+    cert-manager.io/cluster-issuer: {{ $.Values.global.ingress.clusterIssuer | quote }}
+    {{- end }}
+spec:
+  ingressClassName: {{ $.Values.global.ingress.className }}
+  {{- if $.Values.global.ingress.tls }}
+  tls:
+    - hosts:
+        - {{ $host | quote }}
+      secretName: {{ .name }}-tls
+  {{- end }}
+  rules:
+    - host: {{ $host | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .name }}
+                port:
+                  number: {{ .port }}
+---
+{{- end }}
+{{- end }}
+{{- end }}
