@@ -7,8 +7,8 @@
     "start": "ng serve",
     "build": "ng build --configuration production",
     "build:dev": "ng build --configuration development",
-    "test": "ng test --coverage --coverageReporters=lcov",
-    "test:ci": "ng test --no-watch --no-progress --coverage --coverageReporters=lcov",
+    "test": "ng test",
+    "test:ci": "ng test --no-watch --no-progress --code-coverage --browsers=ChromeHeadlessNoSandbox",
     "lint": "ng lint",
     "e2e": "playwright test",
     "i18n:extract": "ng extract-i18n"
@@ -48,6 +48,7 @@
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
+    "karma-jasmine-html-reporter": "~2.1.0",
     "typescript": "~5.5.4"
   }
 }
