@@ -34,7 +34,8 @@ case "$MODE" in
     $COMPOSE up -d --build nexus-gateway nexus-auth nexus-finance \
       nexus-procurement nexus-inventory nexus-sales \
       nexus-hr nexus-production nexus-notification \
-      nexus-import nexus-reporting nexus-ai frontend
+      nexus-import nexus-reporting nexus-config nexus-payment \
+      nexus-ai frontend
     echo ""
     echo ">>> NexusERP démarré !"
     echo ""

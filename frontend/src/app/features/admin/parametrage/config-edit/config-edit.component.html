@@ -1,0 +1,138 @@
+<nx-modal [open]="open" [title]="modalTitle()" size="md" (closed)="onClose()">
+  <div modal-body>
+    @if (current(); as p) {
+      <form class="config-form" (ngSubmit)="onSave()">
+        <div class="config-form__meta">
+          <span class="config-form__chip">{{ catLabel() }}</span>
+          <span class="config-form__chip config-form__chip--type">{{ typeLabel() }}</span>
+          @if (isSecret()) {
+            <span class="config-form__chip config-form__chip--secret" aria-label="Paramètre sensible">🔒 Secret</span>
+          }
+        </div>
+
+        <p class="config-form__key" aria-label="Clé du paramètre">{{ p.key }}</p>
+        @if (p.description) {
+          <p class="config-form__desc">{{ p.description }}</p>
+        }
+
+        <!-- BOOLEAN : toggle -->
+        @if (valueType() === 'BOOLEAN') {
+          <label class="toggle">
+            <input
+              type="checkbox"
+              class="toggle__input"
+              [checked]="formBoolValue()"
+              (change)="onBoolToggle($any($event.target).checked)"
+              [attr.aria-label]="'Activer ' + p.key"
+            />
+            <span class="toggle__track" aria-hidden="true"></span>
+            <span class="toggle__text">{{ formBoolValue() ? 'Activé' : 'Désactivé' }}</span>
+          </label>
+        }
+
+        <!-- SECRET : input password, jamais pré-rempli -->
+        @else if (isSecret()) {
+          <div class="field">
+            <label class="field__label" [attr.for]="'cfg-' + p.key">Nouvelle valeur</label>
+            <input
+              [id]="'cfg-' + p.key"
+              type="password"
+              class="nx-input"
+              autocomplete="new-password"
+              [value]="formValue()"
+              (input)="formValue.set($any($event.target).value)"
+              placeholder="••••••"
+              [attr.aria-label]="'Nouvelle valeur secrète pour ' + p.key"
+            />
+            <p class="field__hint">Laisser vide pour conserver la valeur actuelle.</p>
+            @if (p.set) {
+              <p class="field__hint field__hint--ok">Une valeur est déjà définie (masquée).</p>
+            }
+          </div>
+        }
+
+        <!-- JSON : textarea -->
+        @else if (valueType() === 'JSON') {
+          <div class="field">
+            <label class="field__label" [attr.for]="'cfg-' + p.key">Valeur (JSON)</label>
+            <textarea
+              [id]="'cfg-' + p.key"
+              class="nx-input config-form__textarea"
+              rows="6"
+              [value]="formValue()"
+              (input)="formValue.set($any($event.target).value)"
+              [attr.aria-label]="'Valeur JSON pour ' + p.key"
+              [attr.aria-invalid]="jsonError() ? 'true' : null"
+            ></textarea>
+            @if (jsonError()) {
+              <p class="field__error" role="alert">{{ jsonError() }}</p>
+            }
+            @if (submitted() && isRequiredEmpty()) {
+              <p class="field__error" role="alert">Ce champ est obligatoire.</p>
+            }
+          </div>
+        }
+
+        <!-- NUMBER -->
+        @else if (valueType() === 'NUMBER') {
+          <div class="field">
+            <label class="field__label" [attr.for]="'cfg-' + p.key">Valeur</label>
+            <input
+              [id]="'cfg-' + p.key"
+              type="number"
+              class="nx-input"
+              [value]="formValue()"
+              (input)="formValue.set($any($event.target).value)"
+              [attr.aria-label]="'Valeur numérique pour ' + p.key"
+            />
+            @if (submitted() && isRequiredEmpty()) {
+              <p class="field__error" role="alert">Ce champ est obligatoire.</p>
+            }
+          </div>
+        }
+
+        <!-- STRING (défaut) -->
+        @else {
+          <div class="field">
+            <label class="field__label" [attr.for]="'cfg-' + p.key">Valeur</label>
+            <input
+              [id]="'cfg-' + p.key"
+              type="text"
+              class="nx-input"
+              [value]="formValue()"
+              (input)="formValue.set($any($event.target).value)"
+              [attr.aria-label]="'Valeur pour ' + p.key"
+            />
+            @if (submitted() && isRequiredEmpty()) {
+              <p class="field__error" role="alert">Ce champ est obligatoire.</p>
+            }
+          </div>
+        }
+
+        <div class="field">
+          <label class="field__label" [attr.for]="'cfg-desc-' + p.key">Description (optionnel)</label>
+          <input
+            [id]="'cfg-desc-' + p.key"
+            type="text"
+            class="nx-input"
+            [value]="formDescription()"
+            (input)="formDescription.set($any($event.target).value)"
+            aria-label="Description du paramètre"
+          />
+        </div>
+      </form>
+    }
+  </div>
+
+  <div modal-footer>
+    <button type="button" class="nx-btn nx-btn--ghost" (click)="onClose()">Annuler</button>
+    <button
+      type="button"
+      class="nx-btn nx-btn--primary"
+      [disabled]="isSaving()"
+      (click)="onSave()"
+    >
+      {{ isSaving() ? 'Enregistrement…' : 'Enregistrer' }}
+    </button>
+  </div>
+</nx-modal>

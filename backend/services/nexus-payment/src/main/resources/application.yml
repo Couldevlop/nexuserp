@@ -97,6 +97,16 @@ spring:
 #     moov_money   : MOOV_REAL_BASE_URL + MOOV_API_KEY
 # ─────────────────────────────────────────────────────────────────────────────
 nexus:
+  # ───────────────────────────────────────────────────────────────────────────
+  # Store de configuration centralisé (service nexus-config).
+  # Les clés providers saisies dans l'UI admin Paramétrage (chiffrées AES-256-GCM,
+  # par tenant) sont PRIORITAIRES sur les variables d'environnement ci-dessous.
+  # URL vide => ConfigClient inactif, seul l'env s'applique (fallback non-bloquant).
+  # ───────────────────────────────────────────────────────────────────────────
+  config:
+    url: ${NEXUS_CONFIG_URL:}
+    service-token: ${NEXUS_CONFIG_SERVICE_TOKEN:}
+    cache-ttl-seconds: ${NEXUS_CONFIG_CACHE_TTL_SECONDS:60}
   payment:
     callback-base-url: ${PAYMENT_CALLBACK_BASE_URL:http://localhost:8093/api/v1/payments/webhooks}
     providers:

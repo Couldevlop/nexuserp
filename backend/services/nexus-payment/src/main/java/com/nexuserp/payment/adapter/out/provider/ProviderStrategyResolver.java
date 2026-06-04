@@ -3,6 +3,7 @@ package com.nexuserp.payment.adapter.out.provider;
 import com.nexuserp.core.domain.exception.DomainException;
 import com.nexuserp.payment.domain.model.PaymentProvider;
 import com.nexuserp.payment.infrastructure.config.PaymentProviderProperties;
+import com.nexuserp.payment.infrastructure.config.ProviderConfigResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -17,13 +18,16 @@ import java.util.Map;
  *
  * ACTIVATION ZÉRO-CODE :
  *  - Si les identifiants réels du provider sont configurés
- *    ({@code properties.forProvider(p).isRealConfigured(p)} == true)
+ *    ({@code configResolver.forProvider(p).isRealConfigured(p)} == true)
  *    ET qu'une stratégie réelle existe -> la stratégie RÉELLE est utilisée.
  *  - Sinon -> la stratégie SIMULÉE (comportement par défaut, tous les tests existants
  *    restent verts car aucun identifiant réel n'est fourni en test/dev).
  *
- * La résolution se fait à CHAQUE appel : ajouter les variables d'environnement et
- * redémarrer suffit pour basculer un provider de SIMULÉ à RÉEL, sans recompiler.
+ * La résolution se fait à CHAQUE appel, sur la config EFFECTIVE
+ * ({@link ProviderConfigResolver} : store central nexus-config par tenant
+ * PRIORITAIRE, env en fallback). Deux façons d'activer un provider réel :
+ *  1. ajouter les clés dans l'UI admin Paramétrage -> actif en ~60s, sans redémarrage ;
+ *  2. renseigner les variables d'environnement et redémarrer (fallback historique).
  */
 @Component
 public class ProviderStrategyResolver {
@@ -34,11 +38,11 @@ public class ProviderStrategyResolver {
         new EnumMap<>(PaymentProvider.class);
     private final Map<PaymentProvider, ProviderStrategy> simulatedStrategies =
         new EnumMap<>(PaymentProvider.class);
-    private final PaymentProviderProperties properties;
+    private final ProviderConfigResolver configResolver;
 
     public ProviderStrategyResolver(List<ProviderStrategy> allStrategies,
-                                    PaymentProviderProperties properties) {
-        this.properties = properties;
+                                    ProviderConfigResolver configResolver) {
+        this.configResolver = configResolver;
         for (ProviderStrategy s : allStrategies) {
             if (s instanceof AbstractRealProviderStrategy) {
                 realStrategies.put(s.provider(), s);
@@ -75,7 +79,7 @@ public class ProviderStrategyResolver {
 
     /** True si le provider doit utiliser son API réelle (identifiants présents). */
     public boolean isRealConfigured(PaymentProvider provider) {
-        PaymentProviderProperties.ProviderConfig cfg = properties.forProvider(provider.name());
+        PaymentProviderProperties.ProviderConfig cfg = configResolver.forProvider(provider.name());
         return cfg != null && cfg.isRealConfigured(provider.name());
     }
 }

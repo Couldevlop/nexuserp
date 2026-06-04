@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nexuserp.payment.domain.port.out.CallbackResult;
 import com.nexuserp.payment.infrastructure.config.PaymentProviderProperties;
+import com.nexuserp.payment.infrastructure.config.ProviderConfigResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.client.RestClient;
@@ -14,7 +15,8 @@ import java.math.BigDecimal;
  * Base des stratégies RÉELLES (appels aux API providers via {@link RestClient}).
  *
  * Mutualise :
- *  - accès à la config réelle ({@link PaymentProviderProperties.RealApiConfig}),
+ *  - accès à la config EFFECTIVE via {@link ProviderConfigResolver}
+ *    (store central nexus-config par tenant PRIORITAIRE, env en fallback),
  *  - le {@link RestClient} (timeouts bornés),
  *  - le mapping de statut normalisé,
  *  - les helpers JSON.
@@ -27,19 +29,19 @@ public abstract class AbstractRealProviderStrategy implements ProviderStrategy {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
     protected final ObjectMapper objectMapper;
-    protected final PaymentProviderProperties properties;
+    protected final ProviderConfigResolver configResolver;
     protected final RestClient restClient;
 
     protected AbstractRealProviderStrategy(ObjectMapper objectMapper,
-                                           PaymentProviderProperties properties,
+                                           ProviderConfigResolver configResolver,
                                            RestClient.Builder restClientBuilder) {
         this.objectMapper = objectMapper;
-        this.properties = properties;
+        this.configResolver = configResolver;
         this.restClient = restClientBuilder.build();
     }
 
     protected PaymentProviderProperties.ProviderConfig config() {
-        return properties.forProvider(provider().name());
+        return configResolver.forProvider(provider().name());
     }
 
     protected PaymentProviderProperties.RealApiConfig real() {

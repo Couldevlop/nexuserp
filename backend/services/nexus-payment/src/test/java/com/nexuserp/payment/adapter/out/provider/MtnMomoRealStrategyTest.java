@@ -8,6 +8,7 @@ import com.nexuserp.payment.domain.port.out.ProviderResponse;
 import com.nexuserp.payment.infrastructure.config.PaymentProviderProperties;
 import com.nexuserp.payment.infrastructure.config.PaymentProviderProperties.ProviderConfig;
 import com.nexuserp.payment.infrastructure.config.PaymentProviderProperties.RealApiConfig;
+import com.nexuserp.payment.infrastructure.config.ProviderConfigResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -49,7 +50,9 @@ class MtnMomoRealStrategyTest {
 
         RestClient.Builder builder = RestClient.builder();
         server = MockRestServiceServer.bindTo(builder).build();
-        strategy = new MtnMomoRealStrategy(new ObjectMapper(), props, builder);
+        // ConfigClient null : pas de store central en test -> props/env uniquement.
+        strategy = new MtnMomoRealStrategy(new ObjectMapper(),
+            new ProviderConfigResolver(props, null), builder);
     }
 
     @Test
