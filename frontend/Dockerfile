@@ -8,9 +8,10 @@ WORKDIR /app
 # Copier manifestes seuls pour maximiser le cache layer
 COPY package.json package-lock.json ./
 
-# Installer avec cache BuildKit (évite re-téléchargement si package.json inchangé)
+# Installer avec cache BuildKit. npm ci (strict) si le lockfile est synchro,
+# sinon fallback npm install (le temps de régénérer package-lock.json).
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci --legacy-peer-deps --prefer-offline
+    sh -c "npm ci --legacy-peer-deps --prefer-offline || npm install --legacy-peer-deps"
 
 # Copier sources et builder
 COPY . .

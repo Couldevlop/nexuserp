@@ -1,6 +1,5 @@
 package com.nexuserp.payment.adapter.out.provider;
 
-import com.nexuserp.core.domain.exception.DomainException;
 import com.nexuserp.payment.domain.model.PaymentProvider;
 import com.nexuserp.payment.domain.port.out.CallbackResult;
 import com.nexuserp.payment.domain.port.out.PaymentInitiation;
@@ -8,49 +7,37 @@ import com.nexuserp.payment.domain.port.out.PaymentProviderGateway;
 import com.nexuserp.payment.domain.port.out.ProviderResponse;
 import org.springframework.stereotype.Component;
 
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-
 /**
- * Adaptateur OUT par défaut (dev/sandbox) implémentant {@link PaymentProviderGateway}.
+ * Adaptateur OUT implémentant {@link PaymentProviderGateway}.
  *
- * Dispatch vers la {@link ProviderStrategy} concrète via une strategy map keyée par
- * {@link PaymentProvider}, construite par injection de toutes les stratégies disponibles.
+ * Dispatch vers la {@link ProviderStrategy} concrète résolue par le
+ * {@link ProviderStrategyResolver} : RÉELLE si les identifiants du provider sont
+ * configurés (variables d'environnement), SIMULÉE sinon.
  *
- * EXTENSION POINT : déposer une nouvelle @Component ProviderStrategy pour un vrai
- * provider ; elle est automatiquement enregistrée ici (la dernière déclarée pour un
- * provider donné l'emporte), sans modifier ce dispatcher.
+ * Le nom historique est conservé pour ne pas casser le câblage existant ; la sélection
+ * réel/simulé est désormais déléguée au resolver (activation zéro-code).
  */
 @Component
 public class SimulatedPaymentProviderGateway implements PaymentProviderGateway {
 
-    private final Map<PaymentProvider, ProviderStrategy> strategies = new EnumMap<>(PaymentProvider.class);
+    private final ProviderStrategyResolver resolver;
 
-    public SimulatedPaymentProviderGateway(List<ProviderStrategy> providerStrategies) {
-        providerStrategies.forEach(s -> strategies.put(s.provider(), s));
-    }
-
-    private ProviderStrategy strategy(PaymentProvider provider) {
-        ProviderStrategy s = strategies.get(provider);
-        if (s == null) {
-            throw DomainException.of("PROVIDER_UNSUPPORTED", "No gateway strategy for provider " + provider);
-        }
-        return s;
+    public SimulatedPaymentProviderGateway(ProviderStrategyResolver resolver) {
+        this.resolver = resolver;
     }
 
     @Override
     public ProviderResponse initiateCollection(PaymentInitiation initiation) {
-        return strategy(initiation.provider()).initiateCollection(initiation);
+        return resolver.resolve(initiation.provider()).initiateCollection(initiation);
     }
 
     @Override
     public boolean verifyCallback(byte[] rawBody, String signatureHeader, PaymentProvider provider) {
-        return strategy(provider).verifyCallback(rawBody, signatureHeader);
+        return resolver.resolve(provider).verifyCallback(rawBody, signatureHeader);
     }
 
     @Override
     public CallbackResult parseCallback(byte[] rawBody, PaymentProvider provider) {
-        return strategy(provider).parseCallback(rawBody);
+        return resolver.resolve(provider).parseCallback(rawBody);
     }
 }

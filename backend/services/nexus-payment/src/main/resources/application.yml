@@ -83,6 +83,18 @@ spring:
 # OWASP A02 : les webhook-secret proviennent des variables d'environnement / Vault.
 # Les valeurs par défaut ci-dessous sont des secrets de DÉVELOPPEMENT uniquement —
 # elles DOIVENT être surchargées en staging/production.
+#
+# ACTIVATION RÉEL vs SIMULÉ (zéro-code) :
+#   Chaque provider possède un bloc `real`. Tant que ses identifiants REQUIS sont VIDES
+#   (valeur par défaut), la stratégie SIMULÉE est utilisée. Dès que les variables
+#   d'environnement ci-dessous sont renseignées, le provider bascule automatiquement
+#   sur son API RÉELLE — aucune modification de code, juste un redémarrage.
+#
+#   Identifiants requis par provider pour passer en RÉEL :
+#     orange_money : ORANGE_CLIENT_ID + ORANGE_CLIENT_SECRET + ORANGE_MERCHANT_KEY
+#     wave         : WAVE_API_KEY
+#     mtn_momo     : MTN_API_USER + MTN_API_USER_KEY + MTN_SUBSCRIPTION_KEY
+#     moov_money   : MOOV_REAL_BASE_URL + MOOV_API_KEY
 # ─────────────────────────────────────────────────────────────────────────────
 nexus:
   payment:
@@ -93,21 +105,48 @@ nexus:
         webhook-secret: ${ORANGE_WEBHOOK_SECRET:dev-orange-webhook-secret}
         api-base-url: ${ORANGE_API_BASE_URL:https://api.sandbox.orange.com}
         api-key: ${ORANGE_API_KEY:dev-orange-api-key}
+        real:
+          base-url: ${ORANGE_REAL_BASE_URL:${ORANGE_API_BASE_URL:https://api.orange.com}}
+          token-url: ${ORANGE_TOKEN_URL:}
+          client-id: ${ORANGE_CLIENT_ID:}
+          client-secret: ${ORANGE_CLIENT_SECRET:}
+          merchant-key: ${ORANGE_MERCHANT_KEY:}
+          return-url: ${ORANGE_RETURN_URL:}
+          cancel-url: ${ORANGE_CANCEL_URL:}
+          currency: ${ORANGE_CURRENCY:}
       wave:
         enabled: true
         webhook-secret: ${WAVE_WEBHOOK_SECRET:dev-wave-webhook-secret}
         api-base-url: ${WAVE_API_BASE_URL:https://api.wave.com}
         api-key: ${WAVE_API_KEY:dev-wave-api-key}
+        real:
+          base-url: ${WAVE_REAL_BASE_URL:https://api.wave.com}
+          api-key: ${WAVE_REAL_API_KEY:}
+          return-url: ${WAVE_SUCCESS_URL:}
+          cancel-url: ${WAVE_ERROR_URL:}
+          currency: ${WAVE_CURRENCY:}
       mtn_momo:
         enabled: true
         webhook-secret: ${MTN_WEBHOOK_SECRET:dev-mtn-webhook-secret}
         api-base-url: ${MTN_API_BASE_URL:https://sandbox.momodeveloper.mtn.com}
         api-key: ${MTN_API_KEY:dev-mtn-api-key}
+        real:
+          base-url: ${MTN_REAL_BASE_URL:${MTN_API_BASE_URL:https://sandbox.momodeveloper.mtn.com}}
+          api-user: ${MTN_API_USER:}
+          api-user-key: ${MTN_API_USER_KEY:}
+          subscription-key: ${MTN_SUBSCRIPTION_KEY:}
+          target-environment: ${MTN_TARGET_ENVIRONMENT:sandbox}
+          currency: ${MTN_CURRENCY:}
       moov_money:
         enabled: true
         webhook-secret: ${MOOV_WEBHOOK_SECRET:dev-moov-webhook-secret}
         api-base-url: ${MOOV_API_BASE_URL:https://api.moov-africa.ci}
         api-key: ${MOOV_API_KEY:dev-moov-api-key}
+        real:
+          base-url: ${MOOV_REAL_BASE_URL:}
+          api-key: ${MOOV_API_KEY:}
+          return-url: ${MOOV_RETURN_URL:}
+          currency: ${MOOV_CURRENCY:}
 
 management:
   endpoints:

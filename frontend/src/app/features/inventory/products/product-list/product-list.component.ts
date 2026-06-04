@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { BarcodeButtonComponent } from '../../../../shared/components/barcode-button/barcode-button.component';
 import {
   ProductDto, SpringPage, ProductStatus,
   STATUS_LABELS, STATUS_BADGE, VALUATION_LABELS, INVENTORY_API
@@ -12,7 +13,7 @@ import {
 @Component({
   selector: 'nx-product-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, BarcodeButtonComponent],
   templateUrl: './product-list.component.html',
   styleUrl: './product-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -101,6 +102,12 @@ export class ProductListComponent implements OnInit {
 
   onSearch(query: string): void {
     this.searchQuery.set(query);
+  }
+
+  /** Recherche par code scanné (caméra, natif) : alimente le filtre texte. */
+  onScanned(code: string): void {
+    this.searchQuery.set(code);
+    this.notif.info(`Code scanné : ${code}`);
   }
 
   onCategoryChange(category: string): void {
