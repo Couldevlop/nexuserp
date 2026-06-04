@@ -7,6 +7,7 @@ import com.nexuserp.payment.domain.port.out.CallbackResult;
 import com.nexuserp.payment.domain.port.out.PaymentInitiation;
 import com.nexuserp.payment.domain.port.out.ProviderResponse;
 import com.nexuserp.payment.infrastructure.config.PaymentProviderProperties;
+import com.nexuserp.payment.infrastructure.config.ProviderConfigResolver;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -35,9 +36,9 @@ import java.util.Map;
 public class WaveRealStrategy extends AbstractRealProviderStrategy {
 
     public WaveRealStrategy(ObjectMapper objectMapper,
-                            PaymentProviderProperties properties,
+                            ProviderConfigResolver configResolver,
                             RestClient.Builder restClientBuilder) {
-        super(objectMapper, properties, restClientBuilder);
+        super(objectMapper, configResolver, restClientBuilder);
     }
 
     @Override

@@ -699,6 +699,10 @@ services:
       WAVE_WEBHOOK_SECRET: ${WAVE_WEBHOOK_SECRET:-dev_wave_secret}
       MTN_WEBHOOK_SECRET: ${MTN_WEBHOOK_SECRET:-dev_mtn_secret}
       MOOV_WEBHOOK_SECRET: ${MOOV_WEBHOOK_SECRET:-dev_moov_secret}
+      # Store de configuration centralisé (clés providers gérées depuis l'UI admin).
+      # L'env ci-dessus devient un simple fallback si la clé n'est pas dans le store.
+      NEXUS_CONFIG_URL: http://nexus-config:8080
+      NEXUS_CONFIG_SERVICE_TOKEN: ${NEXUS_CONFIG_SERVICE_TOKEN:-}
     ports:
       - "8093:8080"
     depends_on:
@@ -706,9 +710,47 @@ services:
         condition: service_healthy
       kafka:
         condition: service_healthy
+      nexus-config:
+        condition: service_started
     networks:
       nexus-net:
         ipv4_address: 172.20.1.15
+
+  nexus-config:
+    build:
+      context: .
+      dockerfile: backend/services/nexus-config/Dockerfile
+    container_name: nexus-config
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SERVER_PORT: 8080
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: nexuserp
+      DB_USER: nexus
+      DB_PASSWORD: nexus_dev_secret
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KEYCLOAK_URL: http://keycloak:8080
+      # Clé maître AES-256 (base64, 32 octets) — `openssl rand -base64 32`.
+      # Vide en dev = clé dérivée DEV-ONLY (WARNING au démarrage). OBLIGATOIRE en prod.
+      NEXUS_CONFIG_MASTER_KEY: ${NEXUS_CONFIG_MASTER_KEY:-}
+    ports:
+      - "8094:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO/dev/null http://localhost:8080/actuator/health 2>/dev/null || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      nexus-net:
+        ipv4_address: 172.20.1.16
 
   frontend:
     build:

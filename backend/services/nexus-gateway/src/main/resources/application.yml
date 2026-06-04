@@ -152,6 +152,25 @@ spring:
           predicates:
             - Path=/api/v1/reports/**
 
+        # Payment service (Mobile Money Orange/Wave/MTN/Moov)
+        - id: nexus-payment
+          uri: http://nexus-payment:8080
+          predicates:
+            - Path=/api/v1/payments/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: finance-cb
+                fallbackUri: forward:/fallback/payment
+
+        # Config service — paramétrage centralisé chiffré (UI admin).
+        # NB : /api/v1/config/internal/** (valeurs déchiffrées) exige le rôle
+        # SERVICE côté nexus-config (@PreAuthorize) — pas exposé aux users.
+        - id: nexus-config
+          uri: http://nexus-config:8080
+          predicates:
+            - Path=/api/v1/config/**
+
 # Actuator
 management:
   endpoints:
