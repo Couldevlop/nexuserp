@@ -64,8 +64,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${KEYCLOAK_URL:http://localhost:8180}/realms/nexuserp
-
+          issuer-uri: ${KEYCLOAK_ISSUER_URL:${KEYCLOAK_URL:http://localhost:8180}}/realms/nexuserp
+          jwk-set-uri: ${KEYCLOAK_URL:http://localhost:8180}/realms/nexuserp/protocol/openid-connect/certs
 # ─────────────────────────────────────────────────────────────────────────────
 # Chiffrement des secrets (OWASP A02).
 #   NEXUS_CONFIG_MASTER_KEY : clé maître AES-256 en base64 (32 octets).

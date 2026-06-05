@@ -71,8 +71,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${KEYCLOAK_URL:http://localhost:8180}/realms/nexuserp
-
+          issuer-uri: ${KEYCLOAK_ISSUER_URL:${KEYCLOAK_URL:http://localhost:8180}}/realms/nexuserp
+          jwk-set-uri: ${KEYCLOAK_URL:http://localhost:8180}/realms/nexuserp/protocol/openid-connect/certs
   cache:
     type: redis
     redis:

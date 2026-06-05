@@ -356,6 +356,9 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: dev
       KEYCLOAK_URL: http://keycloak:8080
+      # Issuer ATTENDU dans les tokens (le navigateur parle à Keycloak via
+      # localhost:8180) — distinct de l'URL interne servant à charger le JWKS.
+      KEYCLOAK_ISSUER_URL: http://localhost:8180
       REDIS_HOST: redis
       REDIS_PASSWORD: nexus_redis_secret
     ports:
@@ -389,6 +392,9 @@ services:
       DB_USER: nexus
       DB_PASSWORD: nexus_dev_secret
       KEYCLOAK_URL: http://keycloak:8080
+      # Issuer ATTENDU dans les tokens (le navigateur parle à Keycloak via
+      # localhost:8180) — distinct de l'URL interne servant à charger le JWKS.
+      KEYCLOAK_ISSUER_URL: http://localhost:8180
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SMTP_USERNAME: ${SMTP_USERNAME:-}
       SMTP_APP_PASSWORD: ${SMTP_APP_PASSWORD:-}
@@ -420,6 +426,9 @@ services:
       REDIS_HOST: redis
       REDIS_PASSWORD: nexus_redis_secret
       KEYCLOAK_URL: http://keycloak:8080
+      # Issuer ATTENDU dans les tokens (le navigateur parle à Keycloak via
+      # localhost:8180) — distinct de l'URL interne servant à charger le JWKS.
+      KEYCLOAK_ISSUER_URL: http://localhost:8180
     ports:
       - "8082:8080"
     depends_on:
@@ -466,6 +475,9 @@ services:
       DB_PASSWORD: nexus_dev_secret
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       KEYCLOAK_URL: http://keycloak:8080
+      # Issuer ATTENDU dans les tokens (le navigateur parle à Keycloak via
+      # localhost:8180) — distinct de l'URL interne servant à charger le JWKS.
+      KEYCLOAK_ISSUER_URL: http://localhost:8180
       SMTP_USERNAME: ${SMTP_USERNAME:-}
       SMTP_APP_PASSWORD: ${SMTP_APP_PASSWORD:-}
     ports:
@@ -496,6 +508,9 @@ services:
       REDIS_HOST: redis
       REDIS_PASSWORD: nexus_redis_secret
       KEYCLOAK_URL: http://keycloak:8080
+      # Issuer ATTENDU dans les tokens (le navigateur parle à Keycloak via
+      # localhost:8180) — distinct de l'URL interne servant à charger le JWKS.
+      KEYCLOAK_ISSUER_URL: http://localhost:8180
     ports:
       - "8083:8080"
     depends_on:
@@ -524,6 +539,9 @@ services:
       REDIS_HOST: redis
       REDIS_PASSWORD: nexus_redis_secret
       KEYCLOAK_URL: http://keycloak:8080
+      # Issuer ATTENDU dans les tokens (le navigateur parle à Keycloak via
+      # localhost:8180) — distinct de l'URL interne servant à charger le JWKS.
+      KEYCLOAK_ISSUER_URL: http://localhost:8180
     ports:
       - "8084:8080"
     depends_on:
@@ -558,6 +576,9 @@ services:
       REDIS_HOST: redis
       REDIS_PASSWORD: nexus_redis_secret
       KEYCLOAK_URL: http://keycloak:8080
+      # Issuer ATTENDU dans les tokens (le navigateur parle à Keycloak via
+      # localhost:8180) — distinct de l'URL interne servant à charger le JWKS.
+      KEYCLOAK_ISSUER_URL: http://localhost:8180
     ports:
       - "8087:8080"
     depends_on:
@@ -586,6 +607,9 @@ services:
       REDIS_HOST: redis
       REDIS_PASSWORD: nexus_redis_secret
       KEYCLOAK_URL: http://keycloak:8080
+      # Issuer ATTENDU dans les tokens (le navigateur parle à Keycloak via
+      # localhost:8180) — distinct de l'URL interne servant à charger le JWKS.
+      KEYCLOAK_ISSUER_URL: http://localhost:8180
     ports:
       - "8088:8080"
     depends_on:
@@ -614,6 +638,9 @@ services:
       REDIS_HOST: redis
       REDIS_PASSWORD: nexus_redis_secret
       KEYCLOAK_URL: http://keycloak:8080
+      # Issuer ATTENDU dans les tokens (le navigateur parle à Keycloak via
+      # localhost:8180) — distinct de l'URL interne servant à charger le JWKS.
+      KEYCLOAK_ISSUER_URL: http://localhost:8180
     ports:
       - "8089:8080"
     depends_on:
@@ -638,6 +665,9 @@ services:
       MINIO_ACCESS_KEY: nexus_minio_access
       MINIO_SECRET_KEY: nexus_minio_secret
       KEYCLOAK_URL: http://keycloak:8080
+      # Issuer ATTENDU dans les tokens (le navigateur parle à Keycloak via
+      # localhost:8180) — distinct de l'URL interne servant à charger le JWKS.
+      KEYCLOAK_ISSUER_URL: http://localhost:8180
     ports:
       - "8091:8080"
     depends_on:
@@ -668,6 +698,9 @@ services:
       MINIO_ACCESS_KEY: nexus_minio_access
       MINIO_SECRET_KEY: nexus_minio_secret
       KEYCLOAK_URL: http://keycloak:8080
+      # Issuer ATTENDU dans les tokens (le navigateur parle à Keycloak via
+      # localhost:8180) — distinct de l'URL interne servant à charger le JWKS.
+      KEYCLOAK_ISSUER_URL: http://localhost:8180
     ports:
       - "8092:8080"
     depends_on:
@@ -699,6 +732,9 @@ services:
       REDIS_HOST: redis
       REDIS_PASSWORD: nexus_redis_secret
       KEYCLOAK_URL: http://keycloak:8080
+      # Issuer ATTENDU dans les tokens (le navigateur parle à Keycloak via
+      # localhost:8180) — distinct de l'URL interne servant à charger le JWKS.
+      KEYCLOAK_ISSUER_URL: http://localhost:8180
       PAYMENT_CALLBACK_BASE_URL: http://nexus-payment:8080
       ORANGE_WEBHOOK_SECRET: ${ORANGE_WEBHOOK_SECRET:-dev_orange_secret}
       WAVE_WEBHOOK_SECRET: ${WAVE_WEBHOOK_SECRET:-dev_wave_secret}
@@ -737,6 +773,9 @@ services:
       DB_PASSWORD: nexus_dev_secret
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       KEYCLOAK_URL: http://keycloak:8080
+      # Issuer ATTENDU dans les tokens (le navigateur parle à Keycloak via
+      # localhost:8180) — distinct de l'URL interne servant à charger le JWKS.
+      KEYCLOAK_ISSUER_URL: http://localhost:8180
       # Clé maître AES-256 (base64, 32 octets) — `openssl rand -base64 32`.
       # Vide en dev = clé dérivée DEV-ONLY (WARNING au démarrage). OBLIGATOIRE en prod.
       NEXUS_CONFIG_MASTER_KEY: ${NEXUS_CONFIG_MASTER_KEY:-}
