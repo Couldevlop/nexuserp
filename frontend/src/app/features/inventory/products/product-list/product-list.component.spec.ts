@@ -156,6 +156,13 @@ describe('ProductListComponent', () => {
     expect(el.textContent).toContain('ART-001');
   });
 
+  it('should set search query from a scanned barcode', () => {
+    fixture.detectChanges();
+    component.onScanned('ART-001');
+    expect(component.searchQuery()).toBe('ART-001');
+    expect(mockNotif.info).toHaveBeenCalled();
+  });
+
   it('should display empty state when no products', () => {
     httpClient.get.and.returnValue(of({ ...mockPage, content: [], totalElements: 0 }));
     fixture.detectChanges();

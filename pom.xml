@@ -32,6 +32,7 @@
     <module>backend/services/nexus-import</module>
     <module>backend/services/nexus-reporting</module>
     <module>backend/services/nexus-payment</module>
+    <module>backend/services/nexus-config</module>
   </modules>
 
   <properties>

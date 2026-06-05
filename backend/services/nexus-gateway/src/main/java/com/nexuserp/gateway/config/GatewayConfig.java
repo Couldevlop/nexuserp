@@ -119,6 +119,26 @@ public class GatewayConfig {
                     .filter(rateLimitFilter))
                 .uri("lb://nexus-notification"))
 
+            // ─── nexus-payment (Mobile Money) ─────────────────────────────
+            .route("nexus-payment", r -> r
+                .path("/api/v1/payments/**")
+                .filters(f -> f
+                    .filter(tenantFilter)
+                    .filter(rateLimitFilter)
+                    .filter(auditFilter))
+                .uri("lb://nexus-payment"))
+
+            // ─── nexus-config (paramétrage centralisé chiffré) ────────────
+            // NB : /api/v1/config/internal/** (valeurs déchiffrées) exige le
+            // rôle SERVICE côté nexus-config — pas accessible aux users.
+            .route("nexus-config", r -> r
+                .path("/api/v1/config/**")
+                .filters(f -> f
+                    .filter(tenantFilter)
+                    .filter(rateLimitFilter)
+                    .filter(auditFilter))
+                .uri("lb://nexus-config"))
+
             .build();
     }
 }

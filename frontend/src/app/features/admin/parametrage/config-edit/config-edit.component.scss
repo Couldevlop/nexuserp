@@ -1,0 +1,132 @@
+.config-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+
+  &__meta {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  &__chip {
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    background: var(--color-neutral-100);
+    color: var(--color-neutral-700);
+
+    &--type {
+      background: var(--color-info-bg);
+      color: var(--color-info);
+    }
+
+    &--secret {
+      background: var(--color-warning-bg);
+      color: var(--color-warning);
+    }
+  }
+
+  &__key {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--color-neutral-800);
+    margin: 0;
+    word-break: break-all;
+  }
+
+  &__desc {
+    font-size: var(--text-sm);
+    color: var(--color-neutral-500);
+    margin: 0;
+  }
+
+  &__textarea {
+    font-family: var(--font-mono);
+    resize: vertical;
+    min-height: 7rem;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+
+  &__label {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--color-neutral-700);
+  }
+
+  &__hint {
+    font-size: var(--text-xs);
+    color: var(--color-neutral-500);
+    margin: 0;
+
+    &--ok {
+      color: var(--color-accent-600);
+    }
+  }
+
+  &__error {
+    font-size: var(--text-xs);
+    color: var(--color-error);
+    margin: 0;
+  }
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  cursor: pointer;
+
+  &__input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+  }
+
+  &__track {
+    width: 44px;
+    height: 24px;
+    border-radius: var(--radius-full);
+    background: var(--color-neutral-300);
+    position: relative;
+    transition: var(--transition-fast);
+    flex-shrink: 0;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      border-radius: var(--radius-full);
+      background: white;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition-fast);
+    }
+  }
+
+  &__input:checked + &__track {
+    background: var(--color-accent-500);
+
+    &::after {
+      transform: translateX(20px);
+    }
+  }
+
+  &__input:focus-visible + &__track {
+    box-shadow: var(--shadow-glow);
+  }
+
+  &__text {
+    font-size: var(--text-sm);
+    color: var(--color-neutral-700);
+  }
+}

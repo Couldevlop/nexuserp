@@ -17,6 +17,7 @@ COPY backend/services/nexus-notification/pom.xml backend/services/nexus-notifica
 COPY backend/services/nexus-import/pom.xml      backend/services/nexus-import/pom.xml
 COPY backend/services/nexus-reporting/pom.xml   backend/services/nexus-reporting/pom.xml
 COPY backend/services/nexus-payment/pom.xml    backend/services/nexus-payment/pom.xml
+COPY backend/services/nexus-config/pom.xml       backend/services/nexus-config/pom.xml
 
 RUN --mount=type=cache,target=/root/.m2 \
     mvn -f pom.xml dependency:go-offline -pl backend/services/nexus-gateway -am -q 2>/dev/null || true

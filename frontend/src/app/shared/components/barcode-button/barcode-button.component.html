@@ -1,0 +1,15 @@
+@if (visible) {
+  <button
+    type="button"
+    class="nx-btn nx-barcode-btn"
+    [class.nx-barcode-btn--scanning]="scanning()"
+    [disabled]="disabled || scanning()"
+    (click)="onScan()"
+    [attr.aria-busy]="scanning()"
+    [attr.aria-label]="label">
+    <span class="nx-barcode-btn__icon" aria-hidden="true">
+      @if (scanning()) { ⏳ } @else { ▢ }
+    </span>
+    <span class="nx-barcode-btn__label">{{ label }}</span>
+  </button>
+}

@@ -27,6 +27,10 @@
       (input)="onSearch($any($event.target).value)"
       aria-label="Rechercher des articles"
     />
+    <nx-barcode-button
+      label="Scanner"
+      (scanned)="onScanned($event)"
+    />
   </div>
   <div class="filters-bar__category">
     <input

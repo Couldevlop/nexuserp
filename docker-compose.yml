@@ -153,7 +153,9 @@ services:
     ports:
       - "8180:8080"
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf --max-time 5 http://localhost:8080/health/ready | grep -q '\"status\":\"UP\"' || curl -sf --max-time 5 http://localhost:8080/health/ready | grep -q UP"]
+      # KC 25 : endpoint santé sur le port MANAGEMENT 9000, et l'image (ubi-micro)
+      # n'embarque ni curl ni wget -> requête HTTP via bash /dev/tcp.
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000 && echo -en 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q '\"status\": \"UP\"' <&3"]
       interval: 15s
       timeout: 10s
       retries: 25
@@ -685,6 +687,9 @@ services:
     restart: unless-stopped
     environment:
       SPRING_PROFILES_ACTIVE: dev
+      # L'application.yml fixe server.port=8093 ; en conteneur on force 8080
+      # pour coller au mapping "8093:8080" et au HEALTHCHECK du Dockerfile.
+      SERVER_PORT: 8080
       DB_HOST: postgres
       DB_PORT: 5432
       DB_NAME: nexuserp
@@ -699,6 +704,10 @@ services:
       WAVE_WEBHOOK_SECRET: ${WAVE_WEBHOOK_SECRET:-dev_wave_secret}
       MTN_WEBHOOK_SECRET: ${MTN_WEBHOOK_SECRET:-dev_mtn_secret}
       MOOV_WEBHOOK_SECRET: ${MOOV_WEBHOOK_SECRET:-dev_moov_secret}
+      # Store de configuration centralisé (clés providers gérées depuis l'UI admin).
+      # L'env ci-dessus devient un simple fallback si la clé n'est pas dans le store.
+      NEXUS_CONFIG_URL: http://nexus-config:8080
+      NEXUS_CONFIG_SERVICE_TOKEN: ${NEXUS_CONFIG_SERVICE_TOKEN:-}
     ports:
       - "8093:8080"
     depends_on:
@@ -706,9 +715,47 @@ services:
         condition: service_healthy
       kafka:
         condition: service_healthy
+      nexus-config:
+        condition: service_started
     networks:
       nexus-net:
         ipv4_address: 172.20.1.15
+
+  nexus-config:
+    build:
+      context: .
+      dockerfile: backend/services/nexus-config/Dockerfile
+    container_name: nexus-config
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SERVER_PORT: 8080
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: nexuserp
+      DB_USER: nexus
+      DB_PASSWORD: nexus_dev_secret
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KEYCLOAK_URL: http://keycloak:8080
+      # Clé maître AES-256 (base64, 32 octets) — `openssl rand -base64 32`.
+      # Vide en dev = clé dérivée DEV-ONLY (WARNING au démarrage). OBLIGATOIRE en prod.
+      NEXUS_CONFIG_MASTER_KEY: ${NEXUS_CONFIG_MASTER_KEY:-}
+    ports:
+      - "8094:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO/dev/null http://localhost:8080/actuator/health 2>/dev/null || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      nexus-net:
+        ipv4_address: 172.20.1.16
 
   frontend:
     build:
